@@ -1,0 +1,7 @@
+[build.processing.html]
+pretty_urls = true
+
+[[headers]]
+for = "/assets/*"
+[headers.values]
+Cache-Control = "max-age=31536000, immutable"

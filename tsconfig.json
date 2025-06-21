@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@/*": ["./.vitepress/theme/*"]
+    }
+  },
+  "include": [".vitepress/theme/*.ts", "posts", "posts/**/*.md"],
+  "vueCompilerOptions": {
+    "vitePressExtensions": [".md"]
+  }
+}

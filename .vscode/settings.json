@@ -1,0 +1,17 @@
+{
+  "vue.server.includeLanguages": ["vue", "markdown"],
+  "prettier.enable": true,
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  }
+}

@@ -1,0 +1,47 @@
+diff --git a/dist/node/chunk-cyL7XSn2.js b/dist/node/chunk-cyL7XSn2.js
+index 9c6e21a784074e4283bd06e5f0fa83c690ce493c..2c8794f6791a37bb00610c51b5add4057d650167 100644
+--- a/dist/node/chunk-cyL7XSn2.js
++++ b/dist/node/chunk-cyL7XSn2.js
+@@ -14,7 +14,7 @@ import require$$0$4, { resolve as resolve$1, parse as parse$4, basename, posix a
+ import require$$1, { inspect } from 'util';
+ import { tmpdir } from 'os';
+ import * as vite from 'vite';
+-import { normalizePath, loadConfigFromFile, createLogger, mergeConfig as mergeConfig$1, searchForWorkspaceRoot, build as build$1, transformWithEsbuild, createServer as createServer$1 } from 'vite';
++import { normalizePath, loadConfigFromFile, createLogger, mergeConfig as mergeConfig$1, searchForWorkspaceRoot, build as build$1, transformWithOxc, createServer as createServer$1 } from 'vite';
+ import require$$0$3 from 'stream';
+ import require$$2 from 'readline';
+ import require$$3 from 'url';
+@@ -45898,7 +45898,7 @@ async function minifyScript(code, filename) {
+     const oxcMinify = await import('oxc-minify');
+     return oxcMinify.minify(filename, code).code.trim();
+   }
+-  return (await transformWithEsbuild(code, filename, { minify: true })).code.trim();
++  return (await transformWithOxc(code, filename, { minify: true })).code.trim();
+ }
+ function filterOutHeadDescription(head = []) {
+   return head.filter(([type, attrs]) => {
+diff --git a/dist/node/index.js b/dist/node/index.js
+index 615f567735417fdc4b7ffc376d43880d5bf29c0d..1af48b2a16cf302b9e9d22a9d7bd2b08149f4526 100644
+--- a/dist/node/index.js
++++ b/dist/node/index.js
+@@ -55,14 +55,12 @@ function createContentLoader(pattern, {
+   const cache = /* @__PURE__ */ new Map();
+   return {
+     watch: pattern,
+-    async load(files) {
+-      if (!files) {
+-        files = (await glob(pattern, {
+-          ignore: ["**/node_modules/**", "**/dist/**"],
+-          expandDirectories: false,
+-          ...globOptions
+-        })).sort();
+-      }
++    async load() {
++      const files = (await glob(pattern, {
++        ignore: ["**/node_modules/**", "**/dist/**"],
++        expandDirectories: false,
++        ...globOptions
++      })).sort();
+       const md = await createMarkdownRenderer(
+         config.srcDir,
+         config.markdown,
