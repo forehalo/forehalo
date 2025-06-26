@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { join } from 'node:path'
+import mermaidPlugin from './plugins/mermaid'
 
 const root = join(import.meta.dirname, '..')
 
@@ -18,7 +19,11 @@ export default defineConfig({
     resolve: {
       alias: {
         '@': join(root, '.vitepress/theme'),
+        mermaid: join(root, 'node_modules/mermaid/dist/mermaid.esm.mjs'),
       },
+    },
+    optimizeDeps: {
+      exclude: ['mermaid'],
     },
     ssr: {
       noExternal: ['monaco-editor', 'yjs', 'y-protocols', 'y-monaco', 'lib0'],
@@ -43,6 +48,11 @@ export default defineConfig({
           },
         },
       },
+    },
+  },
+  markdown: {
+    config: md => {
+      md.use(mermaidPlugin)
     },
   },
   themeConfig: {

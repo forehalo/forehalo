@@ -33,10 +33,13 @@ class CollaborativeDoc {
 const doc = new CollaborativeDoc()
 const monaco = useTemplateRef<{ editor: Editor }>('monaco')
 
-watchEffect(async () => {
+watchEffect(async (cleanUp) => {
   const editor = monaco.value?.editor
   if (editor) {
-    await doc.bind(editor)
+    const { binding } = await doc.bind(editor)
+    cleanUp(() => {
+      binding.destroy()
+    })
   }
 })
 

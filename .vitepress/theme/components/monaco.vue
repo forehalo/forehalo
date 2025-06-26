@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useData } from 'vitepress'
+
+import { Disposable } from '../utils'
 
 import type { Editor } from './monaco'
 
@@ -35,6 +37,8 @@ const colors = [
 
 const color = colors.at(Math.floor(Math.random() * colors.length))!
 
+const disposable = new Disposable()
+
 onMounted(() => {
   if (elRef.value) {
     import('./monaco')
@@ -42,10 +46,17 @@ onMounted(() => {
         editorRef.value = renderMonacoEditor(elRef.value!, {
           language: props.lang ?? 'plaintext',
         })
+        disposable.add(() => {
+          editorRef.value?.dispose()
+        })
         updateTheme(isDark.value)
         loading.value = false
       })
   }
+})
+
+onUnmounted(() => {
+  disposable.dispose()
 })
 
 watch(isDark, updateTheme)
@@ -55,27 +66,10 @@ watch(isDark, updateTheme)
 <template>
   <div class="monaco-wrapper">
     <div ref="el" class="monaco-in-doc" :class="color" :style="{ width: props.width, height: props.height }"></div>
-    <Transition name="editor-loading">
-      <div v-show="loading" class="loader-wrapper">
-        <div class="loader"></div>
-      </div>
-    </Transition>
+    <Spinner :loading="loading" />
   </div>
 </template>
-
 <style>
-.editor-loading-leave-active {
-  transition: opacity 0.3s ease-in-out;
-}
-
-.editor-loading-leave-from {
-  opacity: 1;
-}
-
-.editor-loading-leave-to {
-  opacity: 0;
-}
-
 .monaco-wrapper {
   border-radius: 8px;
   padding: 20px 24px;
@@ -86,47 +80,6 @@ watch(isDark, updateTheme)
 
   &:hover {
     border-color: var(--vp-c-brand-1);
-  }
-
-  .loader-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--vp-code-block-bg);
-    border-radius: 8px;
-  }
-
-  .loader {
-    width: 24px;
-    height: 24px;
-    aspect-ratio: 1;
-    display: grid;
-    border-radius: 50%;
-    background:
-      linear-gradient(0deg, rgb(0 0 0/50%) 30%, #0000 0 70%, rgb(0 0 0/100%) 0) 50%/8% 100%,
-      linear-gradient(90deg, rgb(0 0 0/25%) 30%, #0000 0 70%, rgb(0 0 0/75%) 0) 50%/100% 8%;
-    background-repeat: no-repeat;
-    animation: spin 1s infinite steps(12);
-  }
-
-  .loader::before,
-  .loader::after {
-    content: "";
-    grid-area: 1/1;
-    border-radius: 50%;
-    background: inherit;
-    opacity: 0.915;
-    transform: rotate(30deg);
-  }
-
-  .loader::after {
-    opacity: 0.83;
-    transform: rotate(60deg);
   }
 
   .monaco-editor {

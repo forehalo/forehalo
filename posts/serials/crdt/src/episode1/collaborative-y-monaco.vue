@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { onMounted, shallowRef, useTemplateRef, watchEffect } from 'vue'
-
 import { CollaborativeDoc } from './doc'
 import type { Editor } from '@/components/monaco'
 
@@ -11,10 +10,13 @@ onMounted(() => {
   docRef.value = new CollaborativeDoc()
 })
 
-watchEffect(async () => {
+watchEffect(async (cleanUp) => {
   const editor = monaco.value?.editor
   if (editor && docRef.value) {
-    await docRef.value.bind(editor)
+    const { binding } = await docRef.value.bind(editor)
+    cleanUp(() => {
+      binding.destroy()
+    })
   }
 })
 

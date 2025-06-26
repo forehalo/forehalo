@@ -4,9 +4,9 @@ description: CRDT is the most beautiful tool I've ever seen on building a collab
 date: 2025-06-02
 ---
 <script setup>
-import YMonaco01 from './src/y-monaco-01.vue'
-import YMonacoList from'./src/y-monaco-list.vue' 
-
+import YMonaco11 from './src/episode1/y-monaco.vue'
+import YMonaco12 from './src/episode1/collaborative-y-monaco.vue'
+import EditorList from'./src/editor-list.vue' 
 </script>
 
 ### Let's go collaborate
@@ -69,7 +69,7 @@ class CollaborativeDoc {
 
 We now have a minimal usable editor. Any changes in the editor, will reflect as an update to bound `Doc` instance. 
 
-<YMonaco01 />
+<YMonaco11 />
 
 Once we have `Monaco` connected with `Yjs` successfully, it's time to make dual or multiples editors collaborative. I'm gonna use `BroadcastChannel` to act like peer-to-peer network broadcasting so we don't rely on a server to do the proxy.
 
@@ -156,7 +156,7 @@ class CollaborativeDoc {
 
 So here we go. We now have a fully collaborative editor. Clicking on the `[Add Peer]` button to add more peers, and don't forget opening a new browser tab to join the game too!
 
-<YMonacoList />
+<EditorList :editor="YMonaco12" />
 
 ### Overview
 

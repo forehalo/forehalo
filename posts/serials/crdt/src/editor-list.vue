@@ -1,14 +1,18 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import YMonaco02 from './y-monaco-02.vue'
 
-const count = ref(2)
+const props = defineProps<{
+  defaultCount?: number
+  editor: any
+}>()
+
+const count = ref(props.defaultCount ?? 2)
 
 </script>
 <template>
   <div class="editors">
-    <YMonaco02 v-for="i in count" :key="i" />
-    <button class="new" @click="count++">Add Peer</button>
+    <component :is="props.editor" v-for="i in count" :key="i" />
+    <button class="new" @click="count++">Add Mocked Peer</button>
   </div>
 </template>
 <style scoped>

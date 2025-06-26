@@ -15,16 +15,16 @@ defineProps<{
 <style scoped>
 .post-list-item-link {
   text-decoration: none;
-}
-
-.post-list-item-title {
-  margin: 0;
   font-weight: 500;
   color: var(--vp-c-text-2);
   transition: color 0.2s ease;
 
   &:hover {
-    color: var(--vp-c-text-1);
+    color: var(--vp-c-text-2);
   }
+}
+
+.post-list-item-title {
+  margin: 0;
 }
 </style>

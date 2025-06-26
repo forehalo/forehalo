@@ -17,5 +17,11 @@ defineProps<{
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
+  &:has(.post-list-item-link:hover) {
+    .post-list-item-link:not(:hover) {
+      color: var(--vp-c-text-3);
+    }
+  }
 }
 </style>
