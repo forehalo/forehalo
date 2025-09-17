@@ -1,6 +1,6 @@
 👋 Hi, I'm Liu Yi.
 
-I now work for AFFiNE, an open source collaboration editor built with [CRDT](https://crdt.tech). I worked for [Leetcode](https://leetcode.cn/) and [ByteDance](https://www.bytedance.com/) before.
+I previously worked at AFFiNE, an open source collaboration editor built with [CRDT](https://crdt.tech). I worked for [Leetcode](https://leetcode.cn/) and [ByteDance](https://www.bytedance.com/) before.
 
 By leading AFFiNE Dev Team, and meanwhile, porting [Yjs](https://github.com/yjs/yjs) with Rust to [y-octo](https://github.com/y-crdt/y-octo), I'm experienced at building large collaborative application.
 
