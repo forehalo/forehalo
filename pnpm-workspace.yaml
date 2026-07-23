@@ -1,5 +1,7 @@
 allowBuilds:
   esbuild: false
+  sharp: false
+  workerd: false
 catalog:
   oxlint-tsgolint: 7.0.2001
   vite: npm:@voidzero-dev/vite-plus-core@0.2.5
