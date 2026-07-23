@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" shape-rendering="crispEdges">
+  <!-- avatar-glyph: 8x8 compiled pixel glyph, abstract "F" bracket pattern, amber blocks on carbon -->
+  <rect width="64" height="64" fill="#0D0F12"/>
+  <!-- pixel grid: 8x8 cells of 8px. Row 0..7, Col 0..7 -->
+  <!-- F spine -->
+  <rect x="8"  y="8"  width="8" height="8" fill="#FFB43A"/>
+  <rect x="8"  y="16" width="8" height="8" fill="#FFB43A"/>
+  <rect x="8"  y="24" width="8" height="8" fill="#FFB43A"/>
+  <rect x="8"  y="32" width="8" height="8" fill="#FF5C28"/>
+  <rect x="8"  y="40" width="8" height="8" fill="#FFB43A"/>
+  <rect x="8"  y="48" width="8" height="8" fill="#FFB43A" opacity="0.55"/>
+  <!-- F top arm -->
+  <rect x="16" y="8" width="8" height="8" fill="#FFB43A"/>
+  <rect x="24" y="8" width="8" height="8" fill="#FFB43A"/>
+  <rect x="32" y="8" width="8" height="8" fill="#FFB43A" opacity="0.75"/>
+  <rect x="40" y="8" width="8" height="8" fill="#FF5C28"/>
+  <!-- F mid arm -->
+  <rect x="16" y="24" width="8" height="8" fill="#FFB43A"/>
+  <rect x="24" y="24" width="8" height="8" fill="#FFB43A" opacity="0.85"/>
+  <rect x="32" y="24" width="8" height="8" fill="#FF5C28" opacity="0.8"/>
+  <!-- scattered compile artifacts -->
+  <rect x="40" y="40" width="8" height="8" fill="#FFB43A" opacity="0.35"/>
+  <rect x="48" y="16" width="8" height="8" fill="#FFB43A" opacity="0.25"/>
+  <rect x="48" y="48" width="8" height="8" fill="#FF5C28" opacity="0.3"/>
+  <rect x="24" y="48" width="8" height="8" fill="#FFB43A" opacity="0.18"/>
+</svg>

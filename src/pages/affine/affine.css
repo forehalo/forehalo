@@ -1,0 +1,25 @@
+/* ── /affine page-local styles — "the knowledge canvas" ─────────────────
+   Dot-grid canvas and gentle block float.
+   All animations are killed globally under reduced motion
+   (html.reduced-motion * in index.css), so no extra guards needed here. */
+
+/* infinite-canvas dot grid (stronger than the global blueprint grid —
+   this one IS the product surface) */
+.affine-dotgrid {
+  background-image: radial-gradient(rgba(139, 144, 152, 0.18) 1px, transparent 1.4px);
+  background-size: 24px 24px;
+}
+
+/* blocks gently float on the canvas (inner wrapper — the outer element
+   owns drag transforms, so the two never fight) */
+@keyframes affine-float {
+  from {
+    transform: translateY(-5px);
+  }
+  to {
+    transform: translateY(5px);
+  }
+}
+.affine-float {
+  animation: affine-float 7s ease-in-out infinite alternate;
+}

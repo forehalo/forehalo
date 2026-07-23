@@ -1,0 +1,266 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-void: #07080a;
+  --color-carbon: #0d0f12;
+  --color-carbon-2: #121519;
+  --color-steel: #1c2027;
+  --color-steel-soft: #2a2f38;
+  --color-bone: #ede9df;
+  --color-ash: #8b9098;
+  --color-dim: #4c525b;
+  --color-halo: #ffb43a;
+  --color-halo-soft: rgba(255, 180, 58, 0.14);
+  --color-rust: #ff5c28;
+  --color-node: #8cc84b;
+  --color-wasi-cyan: #6fe3f9;
+  --color-danger: #ff4d4d;
+  --color-border: #1c2027;
+  --color-input: #1c2027;
+  --color-ring: #ffb43a;
+  --color-background: #07080a;
+  --color-foreground: #ede9df;
+
+  --color-primary: #ffb43a;
+  --color-primary-foreground: #07080a;
+
+  --color-secondary: #121519;
+  --color-secondary-foreground: #ede9df;
+
+  --color-destructive: #ff4d4d;
+  --color-destructive-foreground: #ede9df;
+
+  --color-muted: #121519;
+  --color-muted-foreground: #8b9098;
+
+  --color-accent: #121519;
+  --color-accent-foreground: #ffb43a;
+
+  --color-popover: #121519;
+  --color-popover-foreground: #ede9df;
+
+  --color-card: #0d0f12;
+  --color-card-foreground: #ede9df;
+
+  --color-sidebar: #0d0f12;
+  --color-sidebar-foreground: #ede9df;
+  --color-sidebar-primary: #ffb43a;
+  --color-sidebar-primary-foreground: #07080a;
+  --color-sidebar-accent: #121519;
+  --color-sidebar-accent-foreground: #ffb43a;
+  --color-sidebar-border: #1c2027;
+  --color-sidebar-ring: #ffb43a;
+
+  --font-grotesk: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-xl: 3px;
+  --radius-lg: 3px;
+  --radius-md: 2px;
+  --radius-sm: 2px;
+  --radius-xs: 2px;
+
+  --ease-compile-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit-in: cubic-bezier(0.7, 0, 0.2, 1);
+
+  --shadow-halo-glow: 0 0 24px rgba(255, 180, 58, 0.18);
+  --shadow-halo-ring: 0 0 0 2px rgba(255, 180, 58, 0.14);
+
+  --animate-halo-pulse: halo-pulse 6s ease-in-out infinite;
+  --animate-grid-drift: grid-drift 8s linear infinite;
+
+  @keyframes halo-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 180, 58, 0);
+    }
+    50% {
+      box-shadow: 0 0 12px 2px rgba(255, 180, 58, 0.1);
+    }
+  }
+  @keyframes grid-drift {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 1px 0;
+    }
+  }
+}
+
+/*
+  Tailwind CSS v4 changed the default border color to `currentcolor` and
+  dropped the pointer cursor on buttons. Restore the design-token border
+  color (shadcn convention) and the v3 cursor behavior.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility hud {
+  /* HUD label style (design.md §3) */
+  @apply font-mono uppercase;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+}
+
+@utility micro {
+  @apply font-mono;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+@utility blueprint-grid {
+  /* Blueprint engineering grid overlay — barely visible, drifts 1px/8s */
+  background-image:
+    linear-gradient(to right, rgba(28, 32, 39, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(28, 32, 39, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+@utility halo-glow-hover {
+  /* Halo glow used for interactive hover emphasis */
+  transition:
+    border-color 180ms var(--ease-compile-out),
+    box-shadow 180ms var(--ease-compile-out);
+  &:hover {
+    border-color: var(--steel-soft);
+    box-shadow: 0 0 0 2px var(--halo-soft);
+  }
+}
+
+@utility macro-region {
+  /* Dashed "macro region" (design.md §4) */
+  border: 1px dashed var(--steel-soft);
+  border-radius: 3px;
+}
+
+/* ── YII global styles (design.md §2–§6, §9) ─────────────────────────── */
+
+@layer base {
+  :root {
+    --void: #07080a;
+    --carbon: #0d0f12;
+    --carbon-2: #121519;
+    --steel: #1c2027;
+    --steel-soft: #2a2f38;
+    --bone: #ede9df;
+    --ash: #8b9098;
+    --dim: #4c525b;
+    --halo: #ffb43a;
+    --halo-soft: rgba(255, 180, 58, 0.14);
+    --rust: #ff5c28;
+    --node: #8cc84b;
+    --wasi-cyan: #6fe3f9;
+    --danger: #ff4d4d;
+    --ease-compile-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-exit-in: cubic-bezier(0.7, 0, 0.2, 1);
+    /* Layout metrics shared with components */
+    --topbar-h: 56px;
+  }
+
+  html {
+    scroll-behavior: auto; /* Lenis owns scrolling */
+    /* entrance transforms (framer reveals) must never make the document
+       horizontally scrollable — clip at the root (body is clipped too) */
+    overflow-x: clip;
+  }
+
+  body {
+    @apply bg-void text-bone font-grotesk antialiased;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: clip;
+  }
+
+  /* JetBrains Mono ligatures ON (design.md §3) */
+  code,
+  pre,
+  kbd,
+  .font-mono {
+    font-family: "JetBrains Mono", monospace;
+    font-feature-settings:
+      "liga" 1,
+      "calt" 1,
+      "zero" 1;
+  }
+
+  /* Selection = highlighting source (design.md §5) */
+  ::selection {
+    background: var(--halo-soft);
+    color: var(--bone);
+  }
+
+  /* Focus looks like the cursor's halo (design.md §9) */
+  :focus-visible {
+    outline: 2px solid var(--halo);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--halo-soft);
+    border-radius: 2px;
+  }
+
+  /* Halo cursor replaces native cursor on fine pointers only */
+  @media (pointer: fine) {
+    body.halo-cursor-active,
+    body.halo-cursor-active a,
+    body.halo-cursor-active button,
+    body.halo-cursor-active [role="button"],
+    body.halo-cursor-active input,
+    body.halo-cursor-active textarea,
+    body.halo-cursor-active select,
+    body.halo-cursor-active label {
+      cursor: none;
+    }
+  }
+
+  /* Keyframes referenced via inline styles (Tailwind only emits keyframes for
+     animate-* utilities found in content, so define these explicitly) */
+  @keyframes halo-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 180, 58, 0);
+    }
+    50% {
+      box-shadow: 0 0 12px 2px rgba(255, 180, 58, 0.1);
+    }
+  }
+  @keyframes halo-rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Reduced motion: kill all decorative animation (design.md §9) */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  html[data-motion="reduced"] *,
+  html[data-motion="reduced"] *::before,
+  html[data-motion="reduced"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

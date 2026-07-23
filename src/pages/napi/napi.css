@@ -1,0 +1,266 @@
+/* /napi page-local keyframes (napi.md) — shared index.css is owned by the
+   scaffold, so page-specific animation lives here. All of these are killed
+   globally under prefers-reduced-motion / html[data-motion='reduced']. */
+
+/* N1: idle 6s breathing glow on the giant attribute (design.md §N1) —
+   bridge-violet glow to match the glyph colors */
+@keyframes napi-attr-breathe {
+  0%,
+  100% {
+    text-shadow:
+      0 0 24px rgba(167, 139, 250, 0.25),
+      0 0 64px rgba(167, 139, 250, 0.1);
+  }
+  50% {
+    text-shadow:
+      0 0 40px rgba(167, 139, 250, 0.4),
+      0 0 96px rgba(167, 139, 250, 0.18);
+  }
+}
+
+/* N1: one-shot 400ms glow pulse right after the slot-machine settle */
+@keyframes napi-attr-pulse {
+  0% {
+    text-shadow:
+      0 0 24px rgba(167, 139, 250, 0.25),
+      0 0 64px rgba(167, 139, 250, 0.1);
+  }
+  50% {
+    text-shadow:
+      0 0 88px rgba(167, 139, 250, 0.7),
+      0 0 140px rgba(167, 139, 250, 0.3);
+  }
+  100% {
+    text-shadow:
+      0 0 24px rgba(167, 139, 250, 0.25),
+      0 0 64px rgba(167, 139, 250, 0.1);
+  }
+}
+
+.napi-attr-breathe {
+  animation: napi-attr-breathe 6s ease-in-out infinite;
+}
+.napi-attr-pulse {
+  animation: napi-attr-pulse 0.4s ease-out 1;
+}
+
+/* N1: hovering the attribute rotates the dashed macro-region frame (8s linear) */
+@keyframes napi-dash-march {
+  to {
+    stroke-dashoffset: -160;
+  }
+}
+.napi-frame:hover .napi-frame-dash,
+.napi-frame:focus-visible .napi-frame-dash {
+  animation: napi-dash-march 8s linear infinite;
+}
+
+/* N1 · frame mascots — pure CSS. Parent gets `.napi-logos-live` once the
+   title slot-machine settles; animation-delay sequences Rust → Node. */
+
+/* ── Rust: lightspeed from the left, mild brake squash ─────────────── */
+@keyframes napi-rust-lightspeed {
+  0% {
+    opacity: 0;
+    transform: translateX(-88px) scaleX(1.28) scaleY(0.82);
+    filter: blur(2px);
+  }
+  58% {
+    opacity: 1;
+    transform: translateX(5px) scaleX(1.1) scaleY(0.94);
+    filter: blur(0);
+  }
+  74% {
+    /* soft brake inertia — just a hint of squash */
+    transform: translateX(-3px) scaleX(0.94) scaleY(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scaleX(1) scaleY(1);
+    filter: blur(0);
+  }
+}
+.napi-logo-rust {
+  opacity: 0;
+  transform-origin: 50% 100%;
+}
+.napi-logos-live .napi-logo-rust {
+  animation: napi-rust-lightspeed 0.62s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+}
+
+/* ── Node: materializes from nothing — soft bloom + twinkle flecks ───── */
+@keyframes napi-node-materialize {
+  0% {
+    opacity: 0;
+    transform: rotate(30deg) scale(0.15);
+    filter: blur(8px) brightness(2.6) saturate(1.6);
+  }
+  55% {
+    opacity: 1;
+    transform: rotate(30deg) scale(1);
+    filter: blur(0) brightness(1.5) saturate(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(30deg) scale(1);
+    filter: brightness(1) saturate(1);
+  }
+}
+@keyframes napi-node-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  30% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+@keyframes napi-star-twinkle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15) rotate(12deg);
+  }
+  45% {
+    opacity: 0.35;
+    transform: translate(calc(-50% + var(--dx) * 0.45), calc(-50% + var(--dy) * 0.45)) scale(0.7)
+      rotate(40deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--dx) * 0.75), calc(-50% + var(--dy) * 0.75)) scale(1.05)
+      rotate(70deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.15) rotate(110deg);
+  }
+}
+
+.napi-logo-node {
+  opacity: 0;
+  transform: rotate(30deg);
+  transform-origin: 50% 100%;
+  color: #3c873a;
+}
+.napi-logos-live .napi-logo-node {
+  /* start after Rust's lightspeed (~0.67s) finishes */
+  /* ease-out only — no overshoot bounce after the peak */
+  animation: napi-node-materialize 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.68s both;
+}
+
+.napi-node-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(140, 200, 75, 0.75) 0%,
+    rgba(140, 200, 75, 0.2) 45%,
+    transparent 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+.napi-logos-live .napi-node-glow {
+  animation: napi-node-glow 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.68s both;
+}
+
+.napi-star-fleck {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: #8cc84b;
+  clip-path: polygon(50% 0%, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0% 50%, 38% 38%);
+  box-shadow:
+    0 0 4px rgba(140, 200, 75, 0.95),
+    0 0 10px rgba(140, 200, 75, 0.45);
+}
+.napi-star-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.napi-logos-live .napi-star-fleck {
+  animation: napi-star-twinkle 0.95s cubic-bezier(0.22, 1.15, 0.36, 1) both;
+}
+/* staggered flecks — pure CSS, no JS delay state */
+.napi-logos-live .napi-star-fleck:nth-child(1) {
+  --dx: -20px;
+  --dy: -18px;
+  animation-delay: 0.68s;
+}
+.napi-logos-live .napi-star-fleck:nth-child(2) {
+  --dx: 18px;
+  --dy: -16px;
+  animation-delay: 0.74s;
+}
+.napi-logos-live .napi-star-fleck:nth-child(3) {
+  --dx: -16px;
+  --dy: 14px;
+  animation-delay: 0.72s;
+}
+.napi-logos-live .napi-star-fleck:nth-child(4) {
+  --dx: 20px;
+  --dy: 12px;
+  animation-delay: 0.78s;
+}
+.napi-logos-live .napi-star-fleck:nth-child(5) {
+  --dx: 2px;
+  --dy: -22px;
+  animation-delay: 0.7s;
+}
+.napi-logos-live .napi-star-fleck:nth-child(6) {
+  --dx: -4px;
+  --dy: 18px;
+  animation-delay: 0.8s;
+}
+.napi-logos-live .napi-star-fleck:nth-child(7) {
+  --dx: 24px;
+  --dy: -4px;
+  animation-delay: 0.76s;
+}
+.napi-logos-live .napi-star-fleck:nth-child(8) {
+  --dx: -22px;
+  --dy: 2px;
+  animation-delay: 0.82s;
+}
+
+/* reduced motion: final poses, no entrance flourishes */
+html.reduced-motion .napi-logo-rust,
+html[data-motion="reduced"] .napi-logo-rust {
+  animation: none !important;
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+html.reduced-motion .napi-logo-node,
+html[data-motion="reduced"] .napi-logo-node {
+  animation: none !important;
+  opacity: 1;
+  transform: rotate(30deg);
+  filter: none;
+}
+html.reduced-motion .napi-node-glow,
+html.reduced-motion .napi-star-fleck,
+html[data-motion="reduced"] .napi-node-glow,
+html[data-motion="reduced"] .napi-star-fleck {
+  display: none;
+}
