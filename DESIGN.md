@@ -55,7 +55,7 @@ Tokens live in `src/index.css` `@theme` (Tailwind v4).
 
 **Syntax palette** (code snippets only, `src/lib/highlight.ts`): keywords `halo`, types `wasi-cyan`, strings `node`, numbers `rust`, comments `dim`, punctuation `ash`, attributes always `halo` with a soft glow.
 
-**Background texture**: 2–3% opacity `grain.png` overlay (fixed, `mix-blend-overlay`, global) + a **shared physics backdrop** (`PageBackdrop` in `src/components/page-backdrop.tsx`, engine in `src/lib/backdrop/`) — exactly one fixed full-viewport canvas-2D behind all content (`z-0`, `aria-hidden`, `pointer-events-none`), running one global cursor-reactive scene on every route: **flow-field** (the FFI boundary — particles stream left→right across a wavy violet membrane; crossing it "compiles" them amber → emerald with a velocity burst; the cursor is a gravity **Well** that shoves particles aside and bulges the membrane). Whisper intensity throughout: dim trail bodies, accents only on the membrane and particle color shift, ≤220 particles, DPR ≤2, a single rAF loop paused when the tab is hidden or the canvas off-screen, and a single static frame (no loop) under reduced motion. Scene lives in `src/lib/backdrop/scenes/flow-field.ts`.
+**Background**: solid `void` + static **forge plate** (`PageBackdrop`) — ambient halo/cyan wells, edge-weighted modular grid (96/24px), corner registration marks, soft blueprint hatch, vignette. Film grain at 2–3% opacity above content. No animated canvas; depth without motion.
 
 ---
 
@@ -139,9 +139,9 @@ Shared constants in `src/lib/motion.ts`.
 
 ## 7. Scroll System
 
-- **Lenis** smooth scroll owns scrolling (`html { scroll-behavior: auto }`), synced to ScrollTrigger (`src/hooks/use-smooth-scroll.tsx`). In-page navigation goes through `useScrollTo()`/`useLenis()`, never native `window.scrollTo`.
-- Scroll progress is ambient only (physics backdrop, recompile wipe) — there is no progress rail.
-- **Pins**: at most ONE pinned sequence per page, and only when it drives a _transformation_. No decorative pinning.
+- **Lenis** smooth scroll owns scrolling (`html { scroll-behavior: auto }`, `src/hooks/use-smooth-scroll.tsx`). In-page navigation goes through `useScrollTo()`/`useLenis()`, never native `window.scrollTo`.
+- Scroll progress is ambient only (recompile wipe) — there is no progress rail.
+- **Pins**: at most ONE pinned sequence per page (CSS sticky + framer-motion `useScroll`), and only when it drives a _transformation_. No decorative pinning.
 - Reveals fire once (`useInViewOnce`) and gate on reduced motion.
 
 ---
@@ -154,7 +154,7 @@ The left progress rail (vertical compile log with live percentages, mobile hairl
 
 ### 8.2 TopBar
 
-Fixed, height 56px, `void`@85% + backdrop-blur, bottom border 1px `steel` (fades in after 24px scroll).
+Fixed, height 56px. At rest: fully transparent (reads with the forge plate). After 24px scroll: liquid-glass — `backdrop-blur-2xl` + saturate, translucent white tint, specular top edge, soft depth shadow.
 
 - Left: `Yii` wordmark (hud style) — plain text, no click behavior; hidden on home (the hero owns the name there).
 - Center: nav links to the pages (first-letter uppercase labels; `AFFiNE` keeps its brand casing; the napi-rs page is labeled `#[napi]`).
@@ -207,7 +207,7 @@ Per-section title (`display-lg`, or `display-md` + `font-mono` for compact/comma
 
 ## 11. Dependencies
 
-`react@19`, `typescript`, `vite` (vite-plus), `tailwindcss@4` (theme in `src/index.css`, no config file), `shadcn/ui` primitives (new-york, restyled), `framer-motion` (UI/reveal), `gsap` + `ScrollTrigger` (pinned/scrub scenes), `lenis` (smooth scroll), Google Fonts (Space Grotesk, JetBrains Mono). No Three.js — all effects are canvas-2D/SVG/CSS (lighter, sharper, more "terminal").
+`react@19`, `typescript`, `vite` (vite-plus), `tailwindcss@4` (theme in `src/index.css`, no config file), `shadcn/ui` primitives (new-york, restyled), `framer-motion` (all UI/reveal/scroll-linked animation), `lenis` (smooth scroll), Google Fonts (Space Grotesk, JetBrains Mono). No GSAP, no Three.js — effects are SVG/CSS (and cursor canvas only).
 
 ---
 

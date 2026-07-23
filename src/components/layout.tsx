@@ -24,7 +24,7 @@ import { EASE_COMPILE_OUT } from "@/lib/motion";
  * exception: no Footer. Full-bleed heroes opt out inside the page with a
  * negative top margin (-mt-14).
  *
- * Includes: Navbar (TopBar), Footer, HaloCursor overlay, the global physics
+ * Includes: Navbar (TopBar), Footer, HaloCursor overlay, static forge-plate
  * backdrop, grain overlay, command palette, Lenis smooth scroll, and the
  * "recompile wipe" page transition.
  */
@@ -45,7 +45,6 @@ export function Layout() {
               skip to main
             </a>
 
-            {/* global backdrop — one star-field atmosphere for every crate */}
             <PageBackdrop />
 
             <Navbar />

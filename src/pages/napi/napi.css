@@ -3,18 +3,18 @@
    globally under prefers-reduced-motion / html[data-motion='reduced']. */
 
 /* N1: idle 6s breathing glow on the giant attribute (design.md §N1) —
-   bridge-violet glow to match the glyph colors */
+   bridge-violet glow, a step under the original neon peak */
 @keyframes napi-attr-breathe {
   0%,
   100% {
     text-shadow:
-      0 0 24px rgba(167, 139, 250, 0.25),
-      0 0 64px rgba(167, 139, 250, 0.1);
+      0 0 24px rgba(159, 138, 239, 0.2),
+      0 0 64px rgba(159, 138, 239, 0.08);
   }
   50% {
     text-shadow:
-      0 0 40px rgba(167, 139, 250, 0.4),
-      0 0 96px rgba(167, 139, 250, 0.18);
+      0 0 40px rgba(159, 138, 239, 0.32),
+      0 0 90px rgba(159, 138, 239, 0.14);
   }
 }
 
@@ -22,18 +22,18 @@
 @keyframes napi-attr-pulse {
   0% {
     text-shadow:
-      0 0 24px rgba(167, 139, 250, 0.25),
-      0 0 64px rgba(167, 139, 250, 0.1);
+      0 0 24px rgba(159, 138, 239, 0.2),
+      0 0 64px rgba(159, 138, 239, 0.08);
   }
   50% {
     text-shadow:
-      0 0 88px rgba(167, 139, 250, 0.7),
-      0 0 140px rgba(167, 139, 250, 0.3);
+      0 0 72px rgba(159, 138, 239, 0.5),
+      0 0 120px rgba(159, 138, 239, 0.2);
   }
   100% {
     text-shadow:
-      0 0 24px rgba(167, 139, 250, 0.25),
-      0 0 64px rgba(167, 139, 250, 0.1);
+      0 0 24px rgba(159, 138, 239, 0.2),
+      0 0 64px rgba(159, 138, 239, 0.08);
   }
 }
 

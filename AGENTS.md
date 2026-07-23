@@ -31,7 +31,7 @@ Toolchain notes:
 
 ### Layout owns chrome and offsets
 
-`Layout` (src/components/layout.tsx) renders the global chrome — Navbar (TopBar), Footer, HaloCursor, command palette, the global physics backdrop (flow-field on every route), grain overlay — and the matching content offset: TopBar is fixed 56px (`pt-14`). Pages start below the bar automatically; do not add nav-height padding in pages. Full-bleed heroes opt out with `-mt-14`. (The left BuildRail progress sidebar was removed from every page, along with its section registry — `src/hooks/use-sections.tsx` is gone.)
+`Layout` (src/components/layout.tsx) renders the global chrome — Navbar (TopBar), Footer, HaloCursor, command palette, static forge-plate backdrop (`PageBackdrop`), grain overlay — and the matching content offset: TopBar is fixed 56px (`pt-14`). Pages start below the bar automatically; do not add nav-height padding in pages. Full-bleed heroes opt out with `-mt-14`. (The left BuildRail progress sidebar was removed from every page, along with its section registry — `src/hooks/use-sections.tsx` is gone. No animated canvas backdrop.)
 
 Provider nesting order in Layout: `MotionProvider → ToastProvider → SmoothScrollProvider (Lenis) → CommandPaletteProvider`.
 
@@ -41,7 +41,7 @@ Provider nesting order in Layout: `MotionProvider → ToastProvider → SmoothSc
 
 - Shared constants in `src/lib/motion.ts`: one master ease `EASE_COMPILE_OUT`, `DUR` scale, `TOKEN_STAGGER` (12ms/token). Use these instead of ad-hoc easings.
 - Reusable primitives in `src/components/motion/`: `CompilePrint` (token-by-token text reveal, not typewriter), `MacroExpand`.
-- Library split: framer-motion for UI/reveal animation, GSAP + ScrollTrigger for pinned/scrub scenes, Lenis for smooth scroll. Lenis owns scrolling (`html { scroll-behavior: auto }`) and is synced to ScrollTrigger in `use-smooth-scroll.tsx`; use `useScrollTo()`/`useLenis()` instead of native `window.scrollTo` for in-page navigation.
+- Library split: framer-motion for all UI/reveal/scroll-linked animation (including sticky pin scrub via `useScroll`), Lenis for smooth scroll. Lenis owns scrolling (`html { scroll-behavior: auto }`); use `useScrollTo()`/`useLenis()` instead of native `window.scrollTo` for in-page navigation. Do not reintroduce GSAP.
 - Reduced motion is first-class: `useReducedMotion()` combines OS `prefers-reduced-motion` with a command-palette override (persisted to localStorage, mirrored to `<html data-motion>`). Every animated component must gate decorative animation on it — the motion primitives show the pattern.
 
 ### Design tokens

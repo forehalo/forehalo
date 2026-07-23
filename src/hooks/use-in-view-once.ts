@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * IntersectionObserver helper — fires once when the element enters the
- * viewport. Used for reveal choreography (design.md §10: ScrollTrigger
+ * viewport. Used for reveal choreography (design.md §10: in-view
  * `once: true` equivalents).
  */
 export function useInViewOnce<T extends HTMLElement = HTMLDivElement>(threshold = 0.2) {

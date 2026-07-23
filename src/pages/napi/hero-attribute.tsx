@@ -21,15 +21,15 @@ import { EASE_COMPILE_OUT } from "@/lib/motion";
 
 const ATTR = ["#", "[", "n", "a", "p", "i", "]"] as const;
 /** per-glyph colors: rust-logo orange for `# [ ]`, node.js green for `n`,
- * bridge violet for `a p i` */
+ * bridge violet for `a p i` — a notch under brand primaries (not neon, not mud) */
 const GLYPH_COLORS = [
-  "text-[#f74c00]",
-  "text-[#f74c00]",
-  "text-[#3c873a]",
-  "text-[#a78bfa]",
-  "text-[#a78bfa]",
-  "text-[#a78bfa]",
-  "text-[#f74c00]",
+  "text-[#e45a16]",
+  "text-[#e45a16]",
+  "text-[#429640]",
+  "text-[#9f8aef]",
+  "text-[#9f8aef]",
+  "text-[#9f8aef]",
+  "text-[#e45a16]",
 ] as const;
 const POOL = "#[]{}<>/=+*~napi";
 
@@ -230,7 +230,7 @@ function Attribute() {
         className={`select-none whitespace-pre font-mono font-bold ${
           settledEff ? (pulseDoneEff ? "napi-attr-breathe" : "napi-attr-pulse") : ""
         } text-[clamp(120px,22vw,320px)] leading-[0.9] tracking-[-0.03em] max-sm:text-[clamp(52px,18vw,110px)]`}
-        style={{ textShadow: "0 0 25px rgba(167,139,250,0.15)" }}
+        style={{ textShadow: "0 0 25px rgba(159,138,239,0.14)" }}
       >
         {shown.map((c, i) => (
           <span

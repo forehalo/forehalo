@@ -5,9 +5,7 @@ import { useEffect, useRef, useState } from "react";
 /**
  * S1 · Hero — "Compiled Identity" (home.md §S1, compact — shares the first
  * screen with the log section below, so no full-viewport height, no scroll
- * cue). The old local ParticleField is gone: the home atmosphere now lives in
- * the shared physics backdrop (the flow-field scene — design.md §2), one canvas
- * total. The intro types itself line by line — `#[derive(Human)]`, the name,
+ * cue). The intro types itself line by line — `#[derive(Human)]`, the name,
  * then the verse — and the page's log section reveals only after the typing
  * finishes (onIntroDone). Scroll: content parallax-lifts 0.85× over the
  * first 60vh.

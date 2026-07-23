@@ -9,6 +9,10 @@ import { cn } from "@/lib/utils";
  *
  * Positioning: TopBar is `fixed` (56px) — Layout adds matching top padding to
  * its content slot. Pages must not add their own offsets.
+ *
+ * Material: fully transparent at rest (reads as part of the forge plate).
+ * After scroll (>24px): liquid-glass — blur + saturate, translucent fill,
+ * specular top edge (macOS Tahoe / Liquid Glass vocabulary, dark forge tint).
  */
 
 const ROUTES = [
@@ -39,11 +43,27 @@ function TopBar() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-9000 h-14 border-b bg-void/85 backdrop-blur-md transition-colors duration-300",
-        scrolled ? "border-steel" : "border-transparent",
+        "fixed inset-x-0 top-0 z-9000 h-14 border-b transition-[background-color,border-color,box-shadow,backdrop-filter,-webkit-backdrop-filter] duration-300 ease-out",
+        scrolled
+          ? [
+              // liquid glass (dark): refracts the plate through blur + tint
+              "border-white/10 bg-white/[0.06]",
+              "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14),inset_0_-1px_0_0_rgba(255,255,255,0.04),0_8px_32px_-12px_rgba(0,0,0,0.45)]",
+              "backdrop-blur-2xl backdrop-saturate-150",
+              "supports-backdrop-filter:bg-white/[0.05]",
+            ].join(" ")
+          : "border-transparent bg-transparent shadow-none backdrop-blur-none",
       )}
     >
-      <div className="flex h-full items-center justify-between gap-4 pl-4 pr-4 lg:px-6">
+      {/* specular wash — only when glass is on; mimics Liquid Glass highlight */}
+      {scrolled && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent"
+        />
+      )}
+
+      <div className="relative flex h-full items-center justify-between gap-4 pl-4 pr-4 lg:px-6">
         {/* left: branding (hidden on home — the hero owns the name there) */}
         {pathname !== "/" ? (
           <span className="hud shrink-0 text-bone">Yii</span>
@@ -99,7 +119,10 @@ function TopBar() {
           <button
             onClick={toggle}
             data-cursor="link"
-            className="micro -my-1 rounded-[2px] border border-steel px-2.5 py-1.5 text-dim transition-colors hover:border-halo hover:text-halo"
+            className={cn(
+              "micro -my-1 rounded-[2px] border px-2.5 py-1.5 text-dim transition-colors hover:border-halo hover:text-halo",
+              scrolled ? "border-white/15 bg-white/[0.04]" : "border-steel",
+            )}
             aria-label="open command palette"
             title="command palette"
           >

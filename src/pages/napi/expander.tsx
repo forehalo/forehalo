@@ -1,7 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { animate, useMotionValueEvent, useScroll } from "framer-motion";
 import { SectionHeader } from "@/components/section-header";
 import { CodeBlock } from "@/components/code-block";
 import { MacroExpand } from "@/components/motion/macro-expand";
@@ -10,18 +8,17 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 import { AFTER_CODE, GLUE_ELIMINATED, RAW_FOLD, RAW_FOLD_COUNT, RAW_VISIBLE } from "./raw-binding";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
-
 /**
  * N2 · The Expander (napi.md §N2) — the pinned centerpiece.
  * One CodeBlock frame whose filename tab morphs `binding_raw.rs` ⇄ `sum.rs`.
  * A halo scanline with a mono `⟨ expand ⟩` handle sweeps top→bottom through
- * the code as scroll progresses during the 220vh pin (ScrollTrigger scrub
- * 0.5): above it the 4-line `#[napi]` macro materializes, below it the raw
- * N-API boilerplate dissolves into ghosts (chars scatter 6px + fade). The
- * frame header shows only the filename tab morph; at 100% the frame has
- * shrunk to the 4-line macro. Handle is pointer-draggable + keyboard operable
- * (role=slider). Reduced motion: static two-column with a tap-to-toggle.
+ * the code as scroll progresses during a sticky ~220vh pin (scroll progress
+ * via framer-motion useScroll): above it the 4-line `#[napi]` macro
+ * materializes, below it the raw N-API boilerplate dissolves into ghosts
+ * (chars scatter 6px + fade). The frame header shows only the filename tab
+ * morph; at 100% the frame has shrunk to the 4-line macro. Handle is
+ * pointer-draggable + keyboard operable (role=slider). Reduced motion:
+ * static two-column with a tap-to-toggle.
  */
 
 const BEFORE_LINES = RAW_VISIBLE.split("\n");
@@ -56,6 +53,8 @@ export function Expander() {
 /* ── the pinned before ⇄ after morph ────────────────────────────────────── */
 
 function PinnedMorph() {
+  // tall track + sticky stage replaces GSAP ScrollTrigger pin/scrub
+  const trackRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const beforeRef = useRef<HTMLDivElement | null>(null);
@@ -152,35 +151,24 @@ function PinnedMorph() {
     };
   }, [measure]);
 
-  // 220vh pin — the scanline maps linearly to scroll progress (scrub 0.5)
-  useGSAP(
-    () => {
-      if (!stageRef.current) return;
-      const st = ScrollTrigger.create({
-        trigger: stageRef.current,
-        start: "top top+=56",
-        end: "+=220%",
-        pin: true,
-        scrub: 0.5,
-        onUpdate: (self) => {
-          if (!dragging.current) apply(self.progress);
-        },
-      });
-      return () => st.kill();
-    },
-    { scope: stageRef },
-  );
+  // sticky track maps scroll progress 0→1 across ~220% of the stage height
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ["start start", "end end"],
+  });
+  useMotionValueEvent(scrollYProgress, "change", (p) => {
+    if (!dragging.current) apply(p);
+  });
 
   /* handle drag (pointer) + keyboard (role=slider, magnetic ends) */
   const dragState = useRef({ startY: 0, startP: 0 });
   const tweenTo = useCallback(
     (target: number) => {
-      const obj = { p: progress.current };
-      gsap.to(obj, {
-        p: target,
+      const from = progress.current;
+      animate(from, target, {
         duration: 0.25,
-        ease: "power2.out",
-        onUpdate: () => apply(obj.p),
+        ease: "easeOut",
+        onUpdate: (v) => apply(v),
       });
     },
     [apply],
@@ -217,101 +205,104 @@ function PinnedMorph() {
   const pct = Math.round((eliminated / GLUE_ELIMINATED) * 100);
 
   return (
-    <div
-      ref={stageRef}
-      className="flex h-[calc(100dvh-3.5rem)] flex-col justify-center overflow-hidden"
-    >
-      <div style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}>
-        <div className="rounded-[3px] border border-steel bg-carbon" data-cursor="read">
-          {/* frame header — filename tab morph */}
-          <div className="flex items-center justify-between gap-4 border-b border-steel px-4 py-2">
-            <div className="relative font-mono text-[11px]">
-              <span
-                className={cn(
-                  "transition-opacity duration-150",
-                  afterName ? "opacity-0" : "text-ash",
-                )}
-              >
-                binding_raw.rs
-              </span>
-              <span
-                aria-hidden={!afterName}
-                className={cn(
-                  "absolute left-0 top-0 whitespace-nowrap transition-opacity duration-150",
-                  afterName ? "text-halo opacity-100" : "opacity-0",
-                )}
-              >
-                sum.rs
-              </span>
-            </div>
-          </div>
-
-          {/* the morph viewport */}
-          <div ref={viewportRef} className="relative overflow-hidden">
-            {/* BEFORE — raw boilerplate (the ash/dim world), dissolves as the scanline passes */}
-            <div
-              ref={beforeRef}
-              className="absolute inset-x-0 top-0 py-3 font-mono text-[13px] leading-[1.6] opacity-[0.82]"
-            >
-              {BEFORE_LINES.map((line, i) => (
-                <div key={i} data-row className="whitespace-pre px-4 will-change-transform">
-                  <Gutter n={i + 1} />
-                  {highlightLine(line, "rust", `rv${i}-`)}
-                </div>
-              ))}
-              {/* folded 78 lines */}
-              <div data-row className="px-4">
-                <button
-                  onClick={() => setFoldOpen((v) => !v)}
-                  data-cursor="expand"
-                  className="my-1 w-full rounded-[2px] border border-dashed border-steel-soft px-2 py-1 text-left text-[11px] text-dim transition-colors hover:border-halo hover:text-halo"
+    // 1× sticky stage + 2.2× scroll travel ≈ former ScrollTrigger end "+=220%"
+    <div ref={trackRef} className="relative h-[320vh]">
+      <div
+        ref={stageRef}
+        className="sticky top-14 flex h-[calc(100dvh-3.5rem)] flex-col justify-center overflow-hidden"
+      >
+        <div style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}>
+          <div className="rounded-[3px] border border-steel bg-carbon" data-cursor="read">
+            {/* frame header — filename tab morph */}
+            <div className="flex items-center justify-between gap-4 border-b border-steel px-4 py-2">
+              <div className="relative font-mono text-[11px]">
+                <span
+                  className={cn(
+                    "transition-opacity duration-150",
+                    afterName ? "opacity-0" : "text-ash",
+                  )}
                 >
-                  // … {RAW_FOLD_COUNT} more lines {foldOpen ? "▴" : "▾"}
-                </button>
+                  binding_raw.rs
+                </span>
+                <span
+                  aria-hidden={!afterName}
+                  className={cn(
+                    "absolute left-0 top-0 whitespace-nowrap transition-opacity duration-150",
+                    afterName ? "text-halo opacity-100" : "opacity-0",
+                  )}
+                >
+                  sum.rs
+                </span>
               </div>
-              <MacroExpand open={foldOpen}>
-                {FOLD_LINES.map((line, i) => (
+            </div>
+
+            {/* the morph viewport */}
+            <div ref={viewportRef} className="relative overflow-hidden">
+              {/* BEFORE — raw boilerplate (the ash/dim world), dissolves as the scanline passes */}
+              <div
+                ref={beforeRef}
+                className="absolute inset-x-0 top-0 py-3 font-mono text-[13px] leading-[1.6] opacity-[0.82]"
+              >
+                {BEFORE_LINES.map((line, i) => (
                   <div key={i} data-row className="whitespace-pre px-4 will-change-transform">
-                    <Gutter n={BEFORE_LINES.length + i + 1} />
-                    {highlightLine(line, "rust", `rf${i}-`)}
+                    <Gutter n={i + 1} />
+                    {highlightLine(line, "rust", `rv${i}-`)}
                   </div>
                 ))}
-              </MacroExpand>
-            </div>
-
-            {/* AFTER — the 4-line macro, revealed by the scanline */}
-            <div
-              ref={afterRef}
-              className="absolute inset-x-0 top-0 py-3 font-mono text-[13px] leading-[1.6]"
-              style={{ clipPath: "inset(0 0 100% 0)" }}
-            >
-              {AFTER_LINES.map((line, i) => (
-                <div key={i} className="whitespace-pre px-4">
-                  <Gutter n={i + 1} />
-                  {highlightLine(line, "rust", `af${i}-`)}
+                {/* folded 78 lines */}
+                <div data-row className="px-4">
+                  <button
+                    onClick={() => setFoldOpen((v) => !v)}
+                    data-cursor="expand"
+                    className="my-1 w-full rounded-[2px] border border-dashed border-steel-soft px-2 py-1 text-left text-[11px] text-dim transition-colors hover:border-halo hover:text-halo"
+                  >
+                    // … {RAW_FOLD_COUNT} more lines {foldOpen ? "▴" : "▾"}
+                  </button>
                 </div>
-              ))}
-            </div>
+                <MacroExpand open={foldOpen}>
+                  {FOLD_LINES.map((line, i) => (
+                    <div key={i} data-row className="whitespace-pre px-4 will-change-transform">
+                      <Gutter n={BEFORE_LINES.length + i + 1} />
+                      {highlightLine(line, "rust", `rf${i}-`)}
+                    </div>
+                  ))}
+                </MacroExpand>
+              </div>
 
-            {/* the expansion slider — 1px halo scanline + mono handle */}
-            <div ref={scanRef} className="pointer-events-none absolute inset-x-0 top-0 z-10">
-              <div className="h-px w-full bg-halo shadow-[0_0_8px_rgba(255,180,58,0.65)]" />
-              <button
-                type="button"
-                role="slider"
-                aria-label="expansion slider — drag to expand the macro"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={pct}
-                data-cursor="move"
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
-                onKeyDown={onKeyDown}
-                className="pointer-events-auto absolute right-3 top-0 -translate-y-1/2 touch-none rounded-[2px] border border-steel bg-carbon-2 px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-halo transition-colors hover:border-halo"
+              {/* AFTER — the 4-line macro, revealed by the scanline */}
+              <div
+                ref={afterRef}
+                className="absolute inset-x-0 top-0 py-3 font-mono text-[13px] leading-[1.6]"
+                style={{ clipPath: "inset(0 0 100% 0)" }}
               >
-                ⟨ strip ⟩
-              </button>
+                {AFTER_LINES.map((line, i) => (
+                  <div key={i} className="whitespace-pre px-4">
+                    <Gutter n={i + 1} />
+                    {highlightLine(line, "rust", `af${i}-`)}
+                  </div>
+                ))}
+              </div>
+
+              {/* the expansion slider — 1px halo scanline + mono handle */}
+              <div ref={scanRef} className="pointer-events-none absolute inset-x-0 top-0 z-10">
+                <div className="h-px w-full bg-halo shadow-[0_0_8px_rgba(255,180,58,0.65)]" />
+                <button
+                  type="button"
+                  role="slider"
+                  aria-label="expansion slider — drag to expand the macro"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={pct}
+                  data-cursor="move"
+                  onPointerDown={onPointerDown}
+                  onPointerMove={onPointerMove}
+                  onPointerUp={onPointerUp}
+                  onKeyDown={onKeyDown}
+                  className="pointer-events-auto absolute right-3 top-0 -translate-y-1/2 touch-none rounded-[2px] border border-steel bg-carbon-2 px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-halo transition-colors hover:border-halo"
+                >
+                  ⟨ strip ⟩
+                </button>
+              </div>
             </div>
           </div>
         </div>
