@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Link } from "react-router";
+import { COMMITS, type LogCommit } from "@/pages/home/log-data";
 
 /**
  * Home §2 · The Log — the career as `git log --graph --author="Yii"`.
@@ -25,123 +26,9 @@ import { Link } from "react-router";
  * lane lines stretch seamlessly when a row's macroExpand grows the row.
  * Hover/click a row → macroExpand unfolds the diff panel full-width
  * (under the gutter), its content indented to the commit column.
+ *
+ * Commit rows live in `log-data.ts` (shared with the receipt invoice).
  */
-
-interface FactChip {
-  label: string;
-  href?: string;
-}
-
-interface LogCommit {
-  sha: string;
-  /** which lane owns the dot — main = companies, branch = napi-rs */
-  lane: "main" | "branch";
-  /** renders a `HEAD → main` chip; main lane starts at this dot (HEAD) */
-  head?: boolean;
-  /** root commit: main lane ends at this dot (no line below) */
-  root?: boolean;
-  /** fork row: branch lane drops in from the top and merges into the main dot */
-  fork?: boolean;
-  /** branch lane line runs the full row height (rows at/above the fork) */
-  branchLane?: boolean;
-  message: string;
-  tags: string[];
-  date: string;
-  facts?: FactChip[];
-  diff: string[];
-  /** detail-page route, rendered as `Read More →` */
-  linkChip?: { to: string };
-}
-
-/** the full log — newest first, as `git log --graph` prints */
-const COMMITS: LogCommit[] = [
-  {
-    sha: "f0e4a11",
-    lane: "main",
-    head: true,
-    branchLane: true,
-    message: "at(one2x): independent contributor",
-    tags: ["Rust", "CRDT"],
-    date: "2025 →",
-    facts: [{ label: "one2x.ai ↗", href: "https://one2x.ai" }],
-    diff: ["+ new chapter — building at one2x"],
-  },
-  {
-    sha: "9c3e1d7",
-    lane: "main",
-    branchLane: true,
-    message: "at(toeverything): tech leader · ship AFFiNE",
-    tags: ["Rust", "TypeScript", "CRDT"],
-    date: "2023 → 2025",
-    facts: [{ label: "★70.6k", href: "https://github.com/toeverything/AFFiNE" }],
-    diff: [
-      "+ led the dev team",
-      "+ built y-octo (Rust CRDT engine)",
-      "+ shipped AFFiNE - a collaborative knowledge base",
-    ],
-    linkChip: { to: "/affine" },
-  },
-  {
-    sha: "e210c17",
-    lane: "branch",
-    branchLane: true,
-    message: "at(napi-rs): co-creator · implemented #[napi]",
-    tags: ["Rust"],
-    date: "2021 →",
-    facts: [{ label: "★7.8k", href: "https://github.com/napi-rs/napi-rs" }],
-    diff: ["+ introduce #[napi] macro for Rust → Node.js FFI"],
-    linkChip: { to: "/napi" },
-  },
-  {
-    sha: "57b2aa1",
-    lane: "main",
-    fork: true,
-    message: "at(ByteDance): frontend architector · ship Perfsee",
-    tags: ["TypeScript", "Rust"],
-    date: "2020 → 2023",
-    facts: [
-      { label: "★744", href: "https://github.com/perfsee/perfsee" },
-      { label: "inspires rsdoctor", href: "https://github.com/web-infra-dev/rsdoctor" },
-    ],
-    diff: [
-      "+ lead dev team",
-      "+ created perfsee — bundle analysis · flamegraphs · scoring",
-      "+ guide teams to optimize build & runtime performance of webapps",
-    ],
-    linkChip: { to: "/perfsee" },
-  },
-  {
-    sha: "1a0ff00",
-    lane: "main",
-    message: "at(LeetCode): frontend engineer",
-    tags: ["TypeScript", "GraphQL", "React"],
-    date: "2019 → 2020",
-    facts: [{ label: "leetcode.cn ↗", href: "https://leetcode.cn" }],
-    diff: [
-      "+ contribute to leetcode.cn",
-      "+ ship assessment platform with business partners",
-      "+ monorepo governance, devtools",
-    ],
-  },
-  {
-    sha: "7d3b9c2",
-    lane: "main",
-    message: "at(TheNetCircle): frontend engineer",
-    tags: ["TypeScript", "Vue"],
-    date: "2017 → 2019",
-    diff: ["+ dashboard infra"],
-  },
-  {
-    sha: "3f9e0b1",
-    lane: "main",
-    root: true,
-    message: "at(Soochow University): initial commit",
-    tags: [],
-    date: "→ 2017",
-    facts: [],
-    diff: ["+ software engineering"],
-  },
-];
 
 /* lane geometry — main at x=14, branch (napi-rs, rust) at x=36, dot center y=26 */
 const MAIN_X = "left-[14px]";
@@ -158,7 +45,7 @@ export function LogSection({
   skipReveal = false,
 }: {
   start?: boolean;
-  /** home intro already played this session — no stagger enter */
+  /** home intro already played (localStorage) — no stagger enter */
   skipReveal?: boolean;
 }) {
   const { ref, inView } = useInViewOnce<HTMLDivElement>(0.15);

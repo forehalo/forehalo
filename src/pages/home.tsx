@@ -4,13 +4,14 @@ import { LogSection } from "@/pages/home/log-section";
 import { hasHomeIntroPlayed, markHomeIntroPlayed } from "@/pages/home/intro-session";
 
 /**
- * HOME — `/` · src/pages/index.rs (home.md).
- * The first screen is the compiled identity: hero (name, annotation, status)
- * flows straight into the career as `git log --graph --author="Yii"`.
- * (No boot/loading screen — the hero plays on load. Home opts out of the
- * Layout's Footer.)
+ * HOME — `/home` · src/pages/index.rs (home.md).
+ * The compiled identity: hero (name, annotation, status) flows straight into
+ * the career as `git log --graph --author="Yii"`. Entered from the receipt
+ * gate at `/` via QR. (No boot/loading screen — the hero plays on load.
+ * Home opts out of the Layout's Footer.)
  *
- * Intro animation runs once per SPA session; remounting `/` skips the type-in.
+ * Intro animation runs once per browser (localStorage `fh-home-intro-played`);
+ * remounts and reloads skip the type-in after the first play.
  */
 
 export default function Home() {

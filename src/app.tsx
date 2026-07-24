@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router";
 import { Layout } from "@/components/layout";
 import { StubPage } from "@/pages/stub";
+import Landing from "@/pages/landing";
 
 /**
  * ROUTING CONTRACT (react-dev.md "pattern B — nested routes"):
@@ -9,8 +10,8 @@ import { StubPage } from "@/pages/stub";
  * `<Route element={<Layout/>}>`. Do NOT wrap pages in <Layout> manually and
  * do not pass routes as Layout children — the two patterns must never mix.
  *
- * Home is eager (landing); sub-pages are lazy route chunks (design.md §10
- * performance budget).
+ * Landing (`/`) is eager so first paint never flashes a Suspense loader.
+ * Project crates + `/home` stay lazy route chunks (design.md §10).
  */
 const Home = lazy(() => import("@/pages/home"));
 const Napi = lazy(() => import("@/pages/napi"));
@@ -27,32 +28,38 @@ function PageLoader() {
   );
 }
 
+/** Lazy route chunk with compiling fallback (landing stays eager above). */
+function Lazy({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
+}
+
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
+        <Route index element={<Landing />} />
         <Route
-          index
+          path="home"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Lazy>
               <Home />
-            </Suspense>
+            </Lazy>
           }
         />
         <Route
           path="napi"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Lazy>
               <Napi />
-            </Suspense>
+            </Lazy>
           }
         />
         <Route
           path="affine"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Lazy>
               <Affine />
-            </Suspense>
+            </Lazy>
           }
         />
         {/* /y-octo is merged into /affine (sync → merge → compat → log sections) */}
@@ -60,9 +67,9 @@ export default function App() {
         <Route
           path="perfsee"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Lazy>
               <Perfsee />
-            </Suspense>
+            </Lazy>
           }
         />
         <Route path="*" element={<StubPage file="404.rs" title="not found" />} />

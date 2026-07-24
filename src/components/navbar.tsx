@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons";
 import { useCommandPalette } from "@/components/command-palette";
+import { INNER_HOME_PATH } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 /**
  * Navbar — the design's TopBar (§8.2).
  *
  * Positioning: TopBar is `fixed` (56px) — Layout adds matching top padding to
- * its content slot. Pages must not add their own offsets.
+ * its content slot. Pages must not add their own offsets. (Receipt landing `/`
+ * hides this bar entirely via Layout.)
  *
  * Material: fully transparent at rest (reads as part of the forge plate).
  * After scroll (>24px): `forge-liquid-glass` — ultra-translucent tint,
@@ -30,6 +32,7 @@ function TopBar() {
   const { pathname } = useLocation();
   const { toggle } = useCommandPalette();
   const [scrolled, setScrolled] = useState(false);
+  const onIdentityHome = pathname === INNER_HOME_PATH;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -51,10 +54,10 @@ function TopBar() {
         className="relative flex h-full items-center justify-between gap-4"
         style={{ paddingLeft: "var(--forge-inset)", paddingRight: "var(--forge-inset)" }}
       >
-        {/* left: branding → home (hidden on home — the hero owns the name there) */}
-        {pathname !== "/" ? (
+        {/* left: branding → identity home (hidden there — the hero owns the name) */}
+        {!onIdentityHome ? (
           <Link
-            to="/"
+            to={INNER_HOME_PATH}
             data-cursor="link"
             className="hud shrink-0 text-bone transition-colors hover:text-halo"
             aria-label="Yii — home"

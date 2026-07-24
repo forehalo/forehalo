@@ -1,0 +1,174 @@
+/*
+  Thermal receipt print defects — skip lines, head wear, ghost ink.
+  Scoped to the receipt gate only (not the forge design system).
+*/
+
+.receipt-paper {
+  /* thermal stock is never pure white */
+  background-color: #f4f1ea;
+  color: #1a1814;
+  /* slight curl / thickness at edges */
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+/* light print-head streaks — soft enough that body copy stays readable */
+.receipt-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 28px,
+      rgba(244, 241, 234, 0.35) 28px 28.5px,
+      transparent 28.5px 73px,
+      rgba(244, 241, 234, 0.22) 73px 73.5px,
+      transparent 73.5px 110px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 40px,
+      rgba(255, 255, 255, 0.1) 40px 41px,
+      transparent 41px 88px
+    );
+  mix-blend-mode: normal;
+}
+
+/* fine noise / dust on the stock */
+.receipt-paper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+}
+
+.receipt-ink {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+  Mid-line print-head skip — a thin paper-colored bar cuts through the
+  middle of a whole line (classic thermal “missing stripe”). Vars set
+  per-line from ThermalPrint seed.
+*/
+.receipt-line--mid-skip {
+  position: relative;
+  /* block so text-center / text-left on the line (or parent) actually applies;
+     inline-block shrink-wrap was pinning "CAREER" / "TOTAL DUE" to the left */
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* qty badges etc. that stay inline in a flex row */
+span.receipt-line--mid-skip {
+  display: inline-block;
+  width: auto;
+}
+
+.receipt-line--mid-skip::after {
+  content: "";
+  position: absolute;
+  left: var(--skip-left, 8%);
+  right: var(--skip-right, 8%);
+  top: var(--skip-top, 48%);
+  height: var(--skip-h, 1px);
+  max-height: 2px;
+  background: #f4f1ea;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* per-glyph thermal defects (see ThermalPrint) — light wear only */
+.receipt-glyph {
+  display: inline-block;
+  white-space: pre;
+  position: relative;
+  z-index: 1;
+}
+
+.receipt-glyph--ghost {
+  opacity: 0.55;
+}
+
+.receipt-glyph--faint {
+  opacity: 0.72;
+}
+
+/* thin slice — glyph still readable */
+.receipt-glyph--top {
+  clip-path: inset(0 0 22% 0);
+  opacity: 0.9;
+}
+
+.receipt-glyph--bottom {
+  clip-path: inset(22% 0 0 0);
+  opacity: 0.9;
+}
+
+.receipt-glyph--smudge {
+  opacity: 0.78;
+  transform: scaleY(1.04);
+  transform-origin: bottom center;
+}
+
+/* QR region — no filter/transform here (they create a fixed containing
+   block and break the cursor-adjacent "click to scan" label). */
+.receipt-qr {
+  position: relative;
+  z-index: 1;
+}
+
+.receipt-qr svg {
+  filter: contrast(1.05);
+}
+
+/* Raster ASCII art of the X avatar (public/avatars/yii-ascii.png) */
+.receipt-avatar-ascii {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/*
+  "click to scan" — same thermal mono ink as the receipt body, not a dark chip.
+  Cursor-follow instance is portaled to body; static fallback sits under the QR.
+*/
+.receipt-scan-hint {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1a1814;
+  background: #f4f1ea;
+  border: 1px solid color-mix(in srgb, #1a1814 28%, transparent);
+  border-radius: 1px;
+  padding: 3px 7px;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.receipt-scan-hint--static {
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+  color: color-mix(in srgb, #1a1814 55%, #f4f1ea);
+  border-color: color-mix(in srgb, #1a1814 16%, transparent);
+  text-align: center;
+}
+
+.receipt-scan-hint--static.is-hot {
+  color: #1a1814;
+  border-color: color-mix(in srgb, #1a1814 28%, transparent);
+}

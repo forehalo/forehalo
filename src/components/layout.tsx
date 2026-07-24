@@ -10,6 +10,7 @@ import { ToastProvider } from "@/components/toaster";
 import { MotionProvider, useReducedMotion } from "@/hooks/use-reduced-motion";
 import { SmoothScrollProvider, useLenis } from "@/hooks/use-smooth-scroll";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
+import { INNER_HOME_PATH } from "@/lib/routes";
 
 /**
  * Layout — global chrome for every page (design.md §8).
@@ -20,18 +21,20 @@ import { EASE_COMPILE_OUT } from "@/lib/motion";
  *
  * OFFSET CONTRACT: the TopBar is fixed (56px) — Layout owns the matching top
  * padding on its content slot (`pt-14`). Pages start below the bar
- * automatically — do not add nav-height padding in pages. Home (`/`) is the
- * exception: no Footer. Full-bleed heroes opt out inside the page with a
- * negative top margin (-mt-14).
+ * automatically — do not add nav-height padding in pages. The receipt landing
+ * (`/`) is chrome-free (no TopBar / Footer / grain / forge plate). The
+ * compiled-identity home (`INNER_HOME_PATH`) keeps no Footer. Full-bleed
+ * heroes opt out inside the page with a negative top margin (-mt-14).
  *
  * Includes: Navbar (TopBar), Footer, link/button hover frame, static forge-plate
  * backdrop, grain overlay, command palette, Lenis smooth scroll, and the
  * "recompile wipe" page transition.
  */
 export function Layout() {
-  // home opts out of the Footer
   const { pathname } = useLocation();
-  const home = pathname === "/";
+  const landing = pathname === "/";
+  const identityHome = pathname === INNER_HOME_PATH;
+  const hideFooter = landing || identityHome;
 
   return (
     <MotionProvider>
@@ -45,34 +48,36 @@ export function Layout() {
               skip to main
             </a>
 
-            <PageBackdrop />
+            {!landing && <PageBackdrop />}
 
-            <Navbar />
-            <RecompileWipe />
+            {!landing && <Navbar />}
+            {!landing && <RecompileWipe />}
 
-            <main id="main" className="relative z-10 pt-14">
+            <main id="main" className={landing ? "relative z-10" : "relative z-10 pt-14"}>
               <Outlet />
             </main>
-            {!home && (
+            {!hideFooter && (
               <div className="relative z-10">
                 <Footer />
               </div>
             )}
 
-            {/* film grain: opacity + blend from forge theme vars */}
-            <div
-              aria-hidden
-              className="pointer-events-none fixed inset-0 z-9500"
-              style={{
-                backgroundImage: "url(/grain.png)",
-                backgroundRepeat: "repeat",
-                backgroundSize: "512px 512px",
-                opacity: "var(--grain-opacity)",
-                mixBlendMode: "var(--grain-blend)" as CSSProperties["mixBlendMode"],
-              }}
-            />
+            {/* film grain: opacity + blend from forge theme vars — skipped on receipt */}
+            {!landing && (
+              <div
+                aria-hidden
+                className="pointer-events-none fixed inset-0 z-9500"
+                style={{
+                  backgroundImage: "url(/grain.png)",
+                  backgroundRepeat: "repeat",
+                  backgroundSize: "512px 512px",
+                  opacity: "var(--grain-opacity)",
+                  mixBlendMode: "var(--grain-blend)" as CSSProperties["mixBlendMode"],
+                }}
+              />
+            )}
 
-            <LinkFrame />
+            {!landing && <LinkFrame />}
           </CommandPaletteProvider>
         </SmoothScrollProvider>
       </ToastProvider>
@@ -85,7 +90,8 @@ export function Layout() {
  * lines; the new page reveals beneath it. Skipped on first mount and under
  * reduced motion. */
 const PAGE_LOG: Record<string, { crate: string; version?: string }> = {
-  "/": { crate: "index" },
+  "/": { crate: "receipt" },
+  [INNER_HOME_PATH]: { crate: "index" },
   "/napi": { crate: "napi", version: "2.16.13" },
   "/affine": { crate: "AFFiNE", version: "0.25.0" },
   "/perfsee": { crate: "perfsee", version: "1.9.0" },

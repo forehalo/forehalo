@@ -18,7 +18,7 @@ export function Hero({
 }: {
   start: boolean;
   onIntroDone?: () => void;
-  /** already played this SPA session — print final state, no type-in */
+  /** already played (localStorage) — print final state, no type-in */
   skipIntro?: boolean;
 }) {
   const reduced = useReducedMotion();
