@@ -46,7 +46,7 @@ Provider nesting order in Layout: `MotionProvider → ToastProvider → SmoothSc
 
 ### Design tokens
 
-All tokens live in `src/index.css` `@theme` (Tailwind v4, no tailwind.config): halo amber `#ffb43a` on void `#07080a`, Space Grotesk + JetBrains Mono (ligatures on), 2–3px radii. Custom utilities defined there: `hud`, `micro`, `blueprint-grid`, `halo-glow-hover`, `macro-region`. HaloCursor replaces the native cursor on fine pointers via `body.halo-cursor-active`.
+All tokens live in `src/index.css` (Tailwind v4 `@theme` aliases → CSS vars on `html.dark` / `html.light`): dual forge palette, system default via `prefers-color-scheme` + `fh-theme` override (`next-themes`, FOUC bootstrap in `index.html`). Role names stay fixed (`void`/`bone`/`halo`…); values flip. Space Grotesk + JetBrains Mono (ligatures on), 2–3px radii. Custom utilities: `hud`, `micro`, `blueprint-grid`, `halo-glow-hover`, `macro-region`. HaloCursor replaces the native cursor on fine pointers via `body.halo-cursor-active`. See DESIGN.md §1–§2.
 
 Code snippets on pages use the hand-rolled tokenizer in `src/lib/highlight.ts` (implements the site's syntax palette; deliberately not a general highlighter).
 

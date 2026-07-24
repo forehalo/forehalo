@@ -310,6 +310,7 @@ export function CollabDoc() {
               />
               <div
                 className="absolute -top-5 left-0 whitespace-nowrap rounded-[2px] px-1 py-px font-mono"
+                // fixed dark ink on bright signal chips — not theme void (paper in light)
                 style={{ fontSize: 9, color: "#07080A", backgroundColor: c.color }}
               >
                 {c.name}
@@ -326,7 +327,11 @@ export function CollabDoc() {
             style={{ left: you.x, top: you.y }}
           >
             <div className="w-[2px] bg-wasi-cyan" style={{ height: you.h }} />
-            <div className="absolute -top-5 left-0 rounded-[2px] bg-wasi-cyan px-1 py-px font-mono text-[9px] text-void">
+            <div
+              className="absolute -top-5 left-0 rounded-[2px] bg-wasi-cyan px-1 py-px font-mono text-[9px]"
+              // fixed dark ink on cyan chip (light wasi-cyan fails with void/paper)
+              style={{ color: "#07080A" }}
+            >
               you
             </div>
           </div>

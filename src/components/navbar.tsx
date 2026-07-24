@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
  *
  * Material: fully transparent at rest (reads as part of the forge plate).
  * After scroll (>24px): liquid-glass — blur + saturate, translucent fill,
- * specular top edge (macOS Tahoe / Liquid Glass vocabulary, dark forge tint).
+ * specular top edge. Tint tokens (`--nav-glass-*`) flip with light/dark.
  */
 
 const ROUTES = [
@@ -45,21 +45,28 @@ function TopBar() {
       className={cn(
         "fixed inset-x-0 top-0 z-9000 h-14 border-b transition-[background-color,border-color,box-shadow,backdrop-filter,-webkit-backdrop-filter] duration-300 ease-out",
         scrolled
-          ? [
-              // liquid glass (dark): refracts the plate through blur + tint
-              "border-white/10 bg-white/[0.06]",
-              "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14),inset_0_-1px_0_0_rgba(255,255,255,0.04),0_8px_32px_-12px_rgba(0,0,0,0.45)]",
-              "backdrop-blur-2xl backdrop-saturate-150",
-              "supports-backdrop-filter:bg-white/[0.05]",
-            ].join(" ")
+          ? "backdrop-blur-2xl backdrop-saturate-150"
           : "border-transparent bg-transparent shadow-none backdrop-blur-none",
       )}
+      style={
+        scrolled
+          ? {
+              borderColor: "var(--nav-glass-border)",
+              backgroundColor: "var(--nav-glass-bg)",
+              boxShadow: "var(--nav-glass-shadow)",
+            }
+          : undefined
+      }
     >
       {/* specular wash — only when glass is on; mimics Liquid Glass highlight */}
       {scrolled && (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, transparent, var(--nav-glass-specular), transparent)",
+          }}
         />
       )}
 
@@ -121,8 +128,16 @@ function TopBar() {
             data-cursor="link"
             className={cn(
               "micro -my-1 rounded-[2px] border px-2.5 py-1.5 text-dim transition-colors hover:border-halo hover:text-halo",
-              scrolled ? "border-white/15 bg-white/[0.04]" : "border-steel",
+              !scrolled && "border-steel",
             )}
+            style={
+              scrolled
+                ? {
+                    borderColor: "var(--nav-glass-btn-border)",
+                    backgroundColor: "var(--nav-glass-btn-bg)",
+                  }
+                : undefined
+            }
             aria-label="open command palette"
             title="command palette"
           >

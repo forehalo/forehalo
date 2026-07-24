@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
 import { SectionHeader } from "@/components/section-header";
 import { LabPanel } from "@/pages/perfsee/lab-panel";
 import { useInViewOnce } from "@/hooks/use-in-view-once";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
+import { readCssToken } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 /**
@@ -60,21 +62,36 @@ const ROWS: Frame[][] = [
 ];
 
 /* ── heat color: continuous ash → halo → rust by cursor proximity ─────── */
-function hexLerp(a: string, b: string, t: number): string {
-  const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
-  const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
-  const m = pa.map((v, i) => Math.round(v + (pb[i] - v) * t));
+function parseColor(c: string): [number, number, number] {
+  const hex = c.trim();
+  if (hex.startsWith("#") && hex.length >= 7) {
+    return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as [number, number, number];
+  }
+  const m = hex.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
+  return [0, 0, 0];
+}
+
+function colorLerp(a: string, b: string, t: number): string {
+  const pa = parseColor(a);
+  const pb = parseColor(b);
+  const m = pa.map((v, i) => Math.round(v + (pb[i]! - v) * t));
   return `rgb(${m[0]},${m[1]},${m[2]})`;
 }
 
 function heat(f: number): string {
-  if (f <= 0) return "#8B9098";
-  if (f < 0.55) return hexLerp("#8B9098", "#FFB43A", f / 0.55);
-  return hexLerp("#FFB43A", "#FF5C28", (f - 0.55) / 0.45);
+  const ash = readCssToken("--ash", "#8B9098");
+  const halo = readCssToken("--halo", "#FFB43A");
+  const rust = readCssToken("--rust", "#FF5C28");
+  if (f <= 0) return ash;
+  if (f < 0.55) return colorLerp(ash, halo, f / 0.55);
+  return colorLerp(halo, rust, (f - 0.55) / 0.45);
 }
 
 export function FlameLab() {
   const reduced = useReducedMotion();
+  // re-read forge tokens when theme class flips
+  useTheme();
   const { ref: viewRef, inView } = useInViewOnce<HTMLDivElement>(0.25);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [mx, setMx] = useState<number | null>(null);
@@ -168,7 +185,7 @@ export function FlameLab() {
                         left: `${f.x}%`,
                         width: `calc(${f.w}% - 2px)`,
                         transformOrigin: "left",
-                        backgroundColor: reduced ? "#8B9098" : heat(heatF),
+                        backgroundColor: reduced ? readCssToken("--ash", "#8B9098") : heat(heatF),
                         opacity: reduced ? 0.42 : 0.32 + heatF * 0.68,
                       }}
                       className={cn(

@@ -190,7 +190,9 @@ export function HaloCursor() {
           const px = (s.x + s.vx * age * 0.4) * dpr;
           const py = (s.y + s.vy * age * 0.4 + 30 * age * age) * dpr;
           ctx.globalAlpha = 1 - age;
-          ctx.fillStyle = "#FFB43A";
+          ctx.fillStyle =
+            getComputedStyle(document.documentElement).getPropertyValue("--halo").trim() ||
+            "#FFB43A";
           ctx.fillRect(px, py, 2 * dpr, 2 * dpr);
         }
         ctx.globalAlpha = 1;
@@ -295,7 +297,7 @@ export function HaloCursor() {
             }}
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.12 } }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            style={{ border: "1.5px solid rgba(237,233,223,0.6)" }}
+            style={{ border: "1.5px solid color-mix(in srgb, var(--bone) 60%, transparent)" }}
           />
         )}
       </AnimatePresence>
@@ -324,7 +326,7 @@ export function HaloCursor() {
                 borderRadius: 999,
                 opacity: 1,
                 scale: pressed ? 0.82 : kind === "move" ? 0.7 : 1,
-                backgroundColor: pressed ? "rgba(255,180,58,0.18)" : "rgba(255,180,58,0)",
+                backgroundColor: pressed ? "var(--halo-glow)" : "transparent",
               }}
               transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
               style={{
@@ -338,8 +340,8 @@ export function HaloCursor() {
                     : kind === "ffi"
                       ? `1.5px solid ${ffiColor}`
                       : kind === "sync"
-                        ? "1.5px solid rgba(111,227,249,0.85)"
-                        : "1.5px solid rgba(237,233,223,0.6)",
+                        ? "1.5px solid color-mix(in srgb, var(--wasi-cyan) 85%, transparent)"
+                        : "1.5px solid color-mix(in srgb, var(--bone) 60%, transparent)",
               }}
             >
               {/* expand: dashed ring with slow 8s rotation (halo-rotate defined in index.css) */}
@@ -347,7 +349,7 @@ export function HaloCursor() {
                 <div
                   className="absolute inset-0 rounded-full"
                   style={{
-                    border: "1.5px dashed rgba(255,180,58,0.9)",
+                    border: "1.5px dashed color-mix(in srgb, var(--halo) 90%, transparent)",
                     animation: "halo-rotate 8s linear infinite",
                   }}
                 />
@@ -387,8 +389,8 @@ function Dot({ pressed, crosshair }: { pressed?: boolean; crosshair?: boolean })
         left: crosshair ? -5 : -1.5,
         top: crosshair ? -5 : -1.5,
         borderRadius: 999,
-        backgroundColor: crosshair ? "transparent" : "#FFB43A",
-        border: crosshair ? "1.5px solid #FFB43A" : undefined,
+        backgroundColor: crosshair ? "transparent" : "var(--halo)",
+        border: crosshair ? "1.5px solid var(--halo)" : undefined,
         transform: pressed ? "scale(1.4)" : undefined,
         transition: "transform 120ms cubic-bezier(0.16,1,0.3,1)",
       }}

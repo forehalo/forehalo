@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
 import { SectionHeader } from "@/components/section-header";
 import { LabPanel } from "@/pages/perfsee/lab-panel";
 import { useInViewOnce } from "@/hooks/use-in-view-once";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
+import { readCssToken } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 /**
@@ -132,12 +134,12 @@ const TOTAL = MODULES.reduce((s, m) => s + m.parsed, 0); // 1,819 kB
 const TOTAL_GZIP = MODULES.reduce((s, m) => s + m.gzip, 0); // 513 kB
 const TOTAL_DELTA = MODULES.reduce((s, m) => s + m.delta, 0); // +32 kB
 
-/** heat bucket: block color scales with parsed size */
+/** heat bucket: block color scales with parsed size (forge tokens) */
 function bucket(m: Mod): { fill: string; opacity: number; hot: boolean } {
-  if (m.parsed >= 260) return { fill: "#FFB43A", opacity: 0.72, hot: true }; // halo
-  if (m.parsed >= 120) return { fill: "#8B9098", opacity: 0.5, hot: false }; // ash
-  if (m.parsed >= 50) return { fill: "#4C525B", opacity: 0.5, hot: false }; // dim
-  return { fill: "#2A2F38", opacity: 0.6, hot: false }; // steel-soft
+  if (m.parsed >= 260) return { fill: readCssToken("--halo", "#FFB43A"), opacity: 0.72, hot: true };
+  if (m.parsed >= 120) return { fill: readCssToken("--ash", "#8B9098"), opacity: 0.5, hot: false };
+  if (m.parsed >= 50) return { fill: readCssToken("--dim", "#4C525B"), opacity: 0.5, hot: false };
+  return { fill: readCssToken("--steel-soft", "#2A2F38"), opacity: 0.6, hot: false };
 }
 
 function fmtKb(n: number) {
@@ -146,6 +148,9 @@ function fmtKb(n: number) {
 
 export function BundleLab() {
   const reduced = useReducedMotion();
+  // re-read forge tokens when theme class flips
+  const { resolvedTheme } = useTheme();
+  const themeKey = resolvedTheme ?? "dark";
   const { ref, inView } = useInViewOnce<HTMLDivElement>(0.25);
   const [hovered, setHovered] = useState<string | null>(null);
   const [mode, setMode] = useState<"base" | "pr">("base");
@@ -239,7 +244,7 @@ export function BundleLab() {
               const dimmed = mode === "pr" && m.delta === 0;
               return (
                 <motion.button
-                  key={m.id}
+                  key={`${m.id}-${themeKey}`}
                   type="button"
                   data-cursor="read"
                   aria-label={`${m.path} — ${m.parsed} kB`}
@@ -271,9 +276,9 @@ export function BundleLab() {
                     height: `calc(${m.rect.h}% - 4px)`,
                     backgroundColor: b.fill,
                     boxShadow: changed
-                      ? "inset 0 0 0 1px #FFB43A, 0 0 18px rgba(255,180,58,0.22)"
+                      ? "inset 0 0 0 1px var(--halo), 0 0 18px var(--halo-glow)"
                       : isHovered && b.hot
-                        ? "0 0 24px rgba(255,180,58,0.28)"
+                        ? "0 0 24px var(--halo-glow)"
                         : undefined,
                     zIndex: isHovered ? 10 : changed ? 5 : 1,
                   }}

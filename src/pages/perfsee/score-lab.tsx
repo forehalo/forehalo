@@ -102,7 +102,7 @@ export function ScoreLab() {
                   y1={t.y1}
                   x2={t.x2}
                   y2={t.y2}
-                  stroke={t.value <= p * 100 ? "#8CC84B" : "#1C2027"}
+                  stroke={t.value <= p * 100 ? "var(--node)" : "var(--steel)"}
                   strokeWidth={t.major ? 2 : 1}
                   opacity={t.major ? 0.9 : 0.6}
                 />
@@ -113,7 +113,7 @@ export function ScoreLab() {
                 cy="130"
                 r={R}
                 fill="none"
-                stroke="#1C2027"
+                stroke="var(--steel)"
                 strokeWidth="10"
                 strokeLinecap="round"
                 strokeDasharray={`${C * ARC} ${C}`}
@@ -125,7 +125,7 @@ export function ScoreLab() {
                 cy="130"
                 r={R}
                 fill="none"
-                stroke="#8CC84B"
+                stroke="var(--node)"
                 strokeWidth="10"
                 strokeLinecap="round"
                 strokeDasharray={`${C * ARC} ${C}`}
@@ -139,7 +139,7 @@ export function ScoreLab() {
                   y={t.y}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fill="#4C525B"
+                  fill="var(--dim)"
                   fontSize="9"
                   fontFamily="JetBrains Mono, monospace"
                 >

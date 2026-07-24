@@ -70,12 +70,12 @@ const TRUSTED: TrustMark[] = [
   {
     name: "Next.js",
     href: "https://nextjs.org",
-    mark: <SiNextdotjs size={SIZE} color="#ede9df" aria-hidden />,
+    mark: <SiNextdotjs size={SIZE} color="var(--bone)" aria-hidden />,
   },
   {
     name: "Cursor",
     href: "https://cursor.com",
-    mark: <SiCursor size={SIZE} color="#ede9df" aria-hidden />,
+    mark: <SiCursor size={SIZE} color="var(--bone)" aria-hidden />,
   },
   {
     name: "Microsoft",
@@ -139,7 +139,7 @@ export function Ecosystem() {
                 className={cn(
                   "group flex h-full items-center gap-3 rounded-[3px] border border-steel bg-carbon px-4 py-4",
                   "transition-[border-color,background-color,box-shadow] duration-200",
-                  "hover:border-halo/40 hover:bg-carbon-2 hover:shadow-[0_0_0_1px_rgba(255,180,58,0.08)]",
+                  "hover:border-halo/40 hover:bg-carbon-2 hover:shadow-[0_0_0_1px_var(--halo-soft)]",
                   "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-halo/50",
                 )}
               >

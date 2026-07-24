@@ -105,7 +105,7 @@ const KEYWORDS: Record<Lang, Set<string>> = {
 
 const C = {
   keyword: "text-halo",
-  attr: "text-halo [text-shadow:0_0_8px_rgba(255,180,58,0.45)]",
+  attr: "text-halo [text-shadow:0_0_8px_var(--halo-glow)]",
   type: "text-wasi-cyan",
   string: "text-node",
   number: "text-rust",

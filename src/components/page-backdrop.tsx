@@ -13,6 +13,7 @@ import type { CSSProperties } from "react";
  *      like a section mark on a drawing.
  *   5. Edge vignette — pulls focus inward without competing with chrome.
  *
+ * Colors come from forge CSS vars (`--forge-*`) so light/dark recolor together.
  * Grain still lives in Layout (above content). This layer is z-0 only.
  */
 export function PageBackdrop() {
@@ -23,9 +24,9 @@ export function PageBackdrop() {
         className="absolute inset-0"
         style={{
           background: [
-            "radial-gradient(ellipse 72% 52% at 88% 8%, rgba(255,180,58,0.06), transparent 58%)",
-            "radial-gradient(ellipse 55% 48% at 6% 92%, rgba(111,227,249,0.028), transparent 52%)",
-            "radial-gradient(ellipse 50% 40% at 50% 110%, rgba(255,92,40,0.02), transparent 55%)",
+            "radial-gradient(ellipse 72% 52% at 88% 8%, var(--forge-well-halo), transparent 58%)",
+            "radial-gradient(ellipse 55% 48% at 6% 92%, var(--forge-well-cyan), transparent 52%)",
+            "radial-gradient(ellipse 50% 40% at 50% 110%, var(--forge-well-rust), transparent 55%)",
           ].join(", "),
         }}
       />
@@ -46,8 +47,8 @@ export function PageBackdrop() {
           className="absolute inset-0"
           style={{
             backgroundImage: [
-              "linear-gradient(to right, rgba(42,47,56,0.5) 1px, transparent 1px)",
-              "linear-gradient(to bottom, rgba(42,47,56,0.5) 1px, transparent 1px)",
+              "linear-gradient(to right, var(--forge-grid-major) 1px, transparent 1px)",
+              "linear-gradient(to bottom, var(--forge-grid-major) 1px, transparent 1px)",
             ].join(", "),
             backgroundSize: "96px 96px",
           }}
@@ -59,7 +60,7 @@ export function PageBackdrop() {
               <path
                 d="M24 0v24M0 24h24"
                 fill="none"
-                stroke="rgba(42,47,56,0.55)"
+                stroke="var(--forge-grid-minor)"
                 strokeWidth="1"
                 strokeDasharray="2.5 3.5"
                 vectorEffect="non-scaling-stroke"
@@ -78,8 +79,8 @@ export function PageBackdrop() {
         className="absolute -right-16 -bottom-24 size-[min(52vw,480px)]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(-42deg, transparent 0 9px, rgba(139,144,152,0.55) 9px 10px)",
-          opacity: 0.07,
+            "repeating-linear-gradient(-42deg, transparent 0 9px, var(--forge-hatch) 9px 10px)",
+          opacity: "var(--forge-hatch-opacity)" as unknown as number,
           maskImage: "radial-gradient(ellipse 70% 70% at 60% 60%, black 0%, transparent 72%)",
           WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 60% 60%, black 0%, transparent 72%)",
         }}
@@ -90,7 +91,7 @@ export function PageBackdrop() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 85% 75% at 50% 40%, transparent 40%, rgba(7,8,10,0.55) 100%)",
+            "radial-gradient(ellipse 85% 75% at 50% 40%, transparent 40%, var(--forge-vignette) 100%)",
         }}
       />
     </div>
@@ -102,7 +103,7 @@ function RegistrationMarks() {
   const arm = 18;
   const thick = 1;
   const inset = 20;
-  const color = "rgba(42, 47, 56, 0.85)"; // steel-soft at ~85%
+  const color = "var(--forge-mark)";
 
   const mark = (pos: CSSProperties, h: "left" | "right", v: "top" | "bottom") => (
     <span

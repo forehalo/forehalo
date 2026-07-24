@@ -11,9 +11,11 @@ import type { ReactNode } from "react";
 import { createElement } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router";
+import { useTheme } from "next-themes";
 import { useToast } from "@/components/toaster";
 import { useMotionPref } from "@/hooks/use-reduced-motion";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
+import type { ThemePreference } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 /**
@@ -105,6 +107,7 @@ function PaletteOverlay() {
   const navigate = useNavigate();
   const toast = useToast();
   const { reduced, setOverride } = useMotionPref();
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   const [query, setQuery] = useState("");
   const [sel, setSel] = useState(0);
@@ -161,16 +164,52 @@ function PaletteOverlay() {
         },
       },
       {
-        id: "theme-void",
+        id: "theme-system",
         group: "theme",
-        label: "theme: void",
+        label: "theme: system",
         run: () => {
-          toast("error[E0407]: light mode is not a member of trait Forge");
+          setTheme("system" satisfies ThemePreference);
+          toast("theme → system");
+          close();
+        },
+      },
+      {
+        id: "theme-dark",
+        group: "theme",
+        label: "theme: dark",
+        run: () => {
+          setTheme("dark" satisfies ThemePreference);
+          toast("theme → dark");
+          close();
+        },
+      },
+      {
+        id: "theme-light",
+        group: "theme",
+        label: "theme: light",
+        run: () => {
+          setTheme("light" satisfies ThemePreference);
+          toast("theme → light");
+          close();
+        },
+      },
+      {
+        id: "theme-cycle",
+        group: "theme",
+        label: `theme: ${theme ?? "system"} → ${resolvedTheme ?? "…"}`,
+        run: () => {
+          // cycle system → dark → light → system
+          const order: ThemePreference[] = ["system", "dark", "light"];
+          const cur = (theme as ThemePreference | undefined) ?? "system";
+          const i = order.indexOf(cur);
+          const next = order[(i + 1) % order.length] ?? "system";
+          setTheme(next);
+          toast(`theme → ${next}`);
           close();
         },
       },
     ],
-    [go, toast, reduced, setOverride, close],
+    [go, toast, reduced, setOverride, close, setTheme, theme, resolvedTheme],
   );
 
   const filtered = useMemo(() => {

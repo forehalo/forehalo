@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Outlet, useLocation } from "react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { Navbar } from "@/components/navbar";
@@ -59,14 +59,16 @@ export function Layout() {
               </div>
             )}
 
-            {/* film grain overlay: 2–3% opacity, fixed, mix-blend-overlay */}
+            {/* film grain: opacity + blend from forge theme vars */}
             <div
               aria-hidden
-              className="pointer-events-none fixed inset-0 z-9500 opacity-[0.028] mix-blend-overlay"
+              className="pointer-events-none fixed inset-0 z-9500"
               style={{
                 backgroundImage: "url(/grain.png)",
                 backgroundRepeat: "repeat",
                 backgroundSize: "512px 512px",
+                opacity: "var(--grain-opacity)",
+                mixBlendMode: "var(--grain-blend)" as CSSProperties["mixBlendMode"],
               }}
             />
 

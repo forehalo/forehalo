@@ -1,58 +1,66 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Theme class variants — next-themes sets .dark / .light on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
 
+/*
+  Forge tokens: role names are stable; hex/rgba live on html.dark / html.light.
+  @theme maps Tailwind utilities (bg-void, text-bone, …) through those vars so
+  the whole site recolors when the root class flips.
+*/
 @theme {
-  --color-void: #07080a;
-  --color-carbon: #0d0f12;
-  --color-carbon-2: #121519;
-  --color-steel: #1c2027;
-  --color-steel-soft: #2a2f38;
-  --color-bone: #ede9df;
-  --color-ash: #8b9098;
-  --color-dim: #4c525b;
-  --color-halo: #ffb43a;
-  --color-halo-soft: rgba(255, 180, 58, 0.14);
-  --color-rust: #ff5c28;
-  --color-node: #8cc84b;
-  --color-wasi-cyan: #6fe3f9;
-  --color-danger: #ff4d4d;
-  --color-border: #1c2027;
-  --color-input: #1c2027;
-  --color-ring: #ffb43a;
-  --color-background: #07080a;
-  --color-foreground: #ede9df;
+  --color-void: var(--void);
+  --color-carbon: var(--carbon);
+  --color-carbon-2: var(--carbon-2);
+  --color-steel: var(--steel);
+  --color-steel-soft: var(--steel-soft);
+  --color-bone: var(--bone);
+  --color-ash: var(--ash);
+  --color-dim: var(--dim);
+  --color-halo: var(--halo);
+  --color-halo-soft: var(--halo-soft);
+  --color-rust: var(--rust);
+  --color-node: var(--node);
+  --color-wasi-cyan: var(--wasi-cyan);
+  --color-danger: var(--danger);
 
-  --color-primary: #ffb43a;
-  --color-primary-foreground: #07080a;
+  --color-border: var(--steel);
+  --color-input: var(--steel);
+  --color-ring: var(--halo);
+  --color-background: var(--void);
+  --color-foreground: var(--bone);
 
-  --color-secondary: #121519;
-  --color-secondary-foreground: #ede9df;
+  --color-primary: var(--halo);
+  --color-primary-foreground: var(--void);
 
-  --color-destructive: #ff4d4d;
-  --color-destructive-foreground: #ede9df;
+  --color-secondary: var(--carbon-2);
+  --color-secondary-foreground: var(--bone);
 
-  --color-muted: #121519;
-  --color-muted-foreground: #8b9098;
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--bone);
 
-  --color-accent: #121519;
-  --color-accent-foreground: #ffb43a;
+  --color-muted: var(--carbon-2);
+  --color-muted-foreground: var(--ash);
 
-  --color-popover: #121519;
-  --color-popover-foreground: #ede9df;
+  --color-accent: var(--carbon-2);
+  --color-accent-foreground: var(--halo);
 
-  --color-card: #0d0f12;
-  --color-card-foreground: #ede9df;
+  --color-popover: var(--carbon-2);
+  --color-popover-foreground: var(--bone);
 
-  --color-sidebar: #0d0f12;
-  --color-sidebar-foreground: #ede9df;
-  --color-sidebar-primary: #ffb43a;
-  --color-sidebar-primary-foreground: #07080a;
-  --color-sidebar-accent: #121519;
-  --color-sidebar-accent-foreground: #ffb43a;
-  --color-sidebar-border: #1c2027;
-  --color-sidebar-ring: #ffb43a;
+  --color-card: var(--carbon);
+  --color-card-foreground: var(--bone);
+
+  --color-sidebar: var(--carbon);
+  --color-sidebar-foreground: var(--bone);
+  --color-sidebar-primary: var(--halo);
+  --color-sidebar-primary-foreground: var(--void);
+  --color-sidebar-accent: var(--carbon-2);
+  --color-sidebar-accent-foreground: var(--halo);
+  --color-sidebar-border: var(--steel);
+  --color-sidebar-ring: var(--halo);
 
   --font-grotesk: "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
@@ -66,8 +74,8 @@
   --ease-compile-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-exit-in: cubic-bezier(0.7, 0, 0.2, 1);
 
-  --shadow-halo-glow: 0 0 24px rgba(255, 180, 58, 0.18);
-  --shadow-halo-ring: 0 0 0 2px rgba(255, 180, 58, 0.14);
+  --shadow-halo-glow: 0 0 24px var(--halo-glow);
+  --shadow-halo-ring: 0 0 0 2px var(--halo-soft);
 
   --animate-halo-pulse: halo-pulse 6s ease-in-out infinite;
   --animate-grid-drift: grid-drift 8s linear infinite;
@@ -75,10 +83,10 @@
   @keyframes halo-pulse {
     0%,
     100% {
-      box-shadow: 0 0 0 0 rgba(255, 180, 58, 0);
+      box-shadow: 0 0 0 0 transparent;
     }
     50% {
-      box-shadow: 0 0 12px 2px rgba(255, 180, 58, 0.1);
+      box-shadow: 0 0 12px 2px var(--halo-glow-mid);
     }
   }
   @keyframes grid-drift {
@@ -128,8 +136,16 @@
 @utility blueprint-grid {
   /* Blueprint engineering grid overlay — barely visible, drifts 1px/8s */
   background-image:
-    linear-gradient(to right, rgba(28, 32, 39, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(28, 32, 39, 0.06) 1px, transparent 1px);
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--steel) 40%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--steel) 40%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 64px 64px;
 }
 
@@ -150,10 +166,18 @@
   border-radius: 3px;
 }
 
-/* ── YII global styles (design.md §2–§6, §9) ─────────────────────────── */
+/* ── Dual-theme forge palette (design.md §2) ─────────────────────────── */
 
 @layer base {
   :root {
+    --ease-compile-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-exit-in: cubic-bezier(0.7, 0, 0.2, 1);
+    --topbar-h: 56px;
+
+    /*
+      Pre-class fallback = dark forge (brand-first). FOUC bootstrap and
+      next-themes replace this with .dark or .light before first paint.
+    */
     --void: #07080a;
     --carbon: #0d0f12;
     --carbon-2: #121519;
@@ -164,14 +188,117 @@
     --dim: #4c525b;
     --halo: #ffb43a;
     --halo-soft: rgba(255, 180, 58, 0.14);
+    --halo-glow: rgba(255, 180, 58, 0.18);
+    --halo-glow-mid: rgba(255, 180, 58, 0.1);
     --rust: #ff5c28;
     --node: #8cc84b;
     --wasi-cyan: #6fe3f9;
     --danger: #ff4d4d;
-    --ease-compile-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-exit-in: cubic-bezier(0.7, 0, 0.2, 1);
-    /* Layout metrics shared with components */
-    --topbar-h: 56px;
+
+    /* Forge plate / chrome (consumed by PageBackdrop, Navbar, grain) */
+    --forge-well-halo: rgba(255, 180, 58, 0.06);
+    --forge-well-cyan: rgba(111, 227, 249, 0.028);
+    --forge-well-rust: rgba(255, 92, 40, 0.02);
+    --forge-grid-major: rgba(42, 47, 56, 0.5);
+    --forge-grid-minor: rgba(42, 47, 56, 0.55);
+    --forge-mark: rgba(42, 47, 56, 0.85);
+    --forge-hatch: rgba(139, 144, 152, 0.55);
+    --forge-hatch-opacity: 0.07;
+    --forge-vignette: rgba(7, 8, 10, 0.55);
+    --nav-glass-bg: rgba(255, 255, 255, 0.06);
+    --nav-glass-bg-support: rgba(255, 255, 255, 0.05);
+    --nav-glass-border: rgba(255, 255, 255, 0.1);
+    --nav-glass-btn-border: rgba(255, 255, 255, 0.15);
+    --nav-glass-btn-bg: rgba(255, 255, 255, 0.04);
+    --nav-glass-specular: rgba(255, 255, 255, 0.25);
+    --nav-glass-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 0 rgba(255, 255, 255, 0.04),
+      0 8px 32px -12px rgba(0, 0, 0, 0.45);
+    --grain-opacity: 0.028;
+    --grain-blend: overlay;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    --void: #07080a;
+    --carbon: #0d0f12;
+    --carbon-2: #121519;
+    --steel: #1c2027;
+    --steel-soft: #2a2f38;
+    --bone: #ede9df;
+    --ash: #8b9098;
+    --dim: #4c525b;
+    --halo: #ffb43a;
+    --halo-soft: rgba(255, 180, 58, 0.14);
+    --halo-glow: rgba(255, 180, 58, 0.18);
+    --halo-glow-mid: rgba(255, 180, 58, 0.1);
+    --rust: #ff5c28;
+    --node: #8cc84b;
+    --wasi-cyan: #6fe3f9;
+    --danger: #ff4d4d;
+
+    --forge-well-halo: rgba(255, 180, 58, 0.06);
+    --forge-well-cyan: rgba(111, 227, 249, 0.028);
+    --forge-well-rust: rgba(255, 92, 40, 0.02);
+    --forge-grid-major: rgba(42, 47, 56, 0.5);
+    --forge-grid-minor: rgba(42, 47, 56, 0.55);
+    --forge-mark: rgba(42, 47, 56, 0.85);
+    --forge-hatch: rgba(139, 144, 152, 0.55);
+    --forge-hatch-opacity: 0.07;
+    --forge-vignette: rgba(7, 8, 10, 0.55);
+    --nav-glass-bg: rgba(255, 255, 255, 0.06);
+    --nav-glass-bg-support: rgba(255, 255, 255, 0.05);
+    --nav-glass-border: rgba(255, 255, 255, 0.1);
+    --nav-glass-btn-border: rgba(255, 255, 255, 0.15);
+    --nav-glass-btn-bg: rgba(255, 255, 255, 0.04);
+    --nav-glass-specular: rgba(255, 255, 255, 0.25);
+    --nav-glass-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 0 rgba(255, 255, 255, 0.04),
+      0 8px 32px -12px rgba(0, 0, 0, 0.45);
+    --grain-opacity: 0.028;
+    --grain-blend: overlay;
+  }
+
+  /* Warm paper forge — not cold gray SaaS light */
+  html.light {
+    color-scheme: light;
+    --void: #f4f1ea;
+    --carbon: #fffdf8;
+    --carbon-2: #efeae1;
+    --steel: #ddd6c8;
+    --steel-soft: #c4bbab;
+    --bone: #14161a;
+    --ash: #5a5f68;
+    --dim: #8b9098;
+    --halo: #c98512;
+    --halo-soft: rgba(201, 133, 18, 0.14);
+    --halo-glow: rgba(201, 133, 18, 0.16);
+    --halo-glow-mid: rgba(201, 133, 18, 0.12);
+    --rust: #e04a1a;
+    --node: #5a9e2e;
+    --wasi-cyan: #1a9fb8;
+    --danger: #d93636;
+
+    --forge-well-halo: rgba(201, 133, 18, 0.08);
+    --forge-well-cyan: rgba(26, 159, 184, 0.05);
+    --forge-well-rust: rgba(224, 74, 26, 0.03);
+    --forge-grid-major: rgba(196, 187, 171, 0.55);
+    --forge-grid-minor: rgba(196, 187, 171, 0.5);
+    --forge-mark: rgba(90, 95, 104, 0.45);
+    --forge-hatch: rgba(90, 95, 104, 0.4);
+    --forge-hatch-opacity: 0.06;
+    --forge-vignette: rgba(244, 241, 234, 0.72);
+    --nav-glass-bg: rgba(20, 22, 26, 0.05);
+    --nav-glass-bg-support: rgba(20, 22, 26, 0.04);
+    --nav-glass-border: rgba(20, 22, 26, 0.1);
+    --nav-glass-btn-border: rgba(20, 22, 26, 0.12);
+    --nav-glass-btn-bg: rgba(20, 22, 26, 0.04);
+    --nav-glass-specular: rgba(255, 255, 255, 0.55);
+    --nav-glass-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 0 rgba(20, 22, 26, 0.04),
+      0 8px 32px -12px rgba(20, 22, 26, 0.12);
+    --grain-opacity: 0.035;
+    --grain-blend: multiply;
   }
 
   html {
@@ -233,10 +360,10 @@
   @keyframes halo-pulse {
     0%,
     100% {
-      box-shadow: 0 0 0 0 rgba(255, 180, 58, 0);
+      box-shadow: 0 0 0 0 transparent;
     }
     50% {
-      box-shadow: 0 0 12px 2px rgba(255, 180, 58, 0.1);
+      box-shadow: 0 0 12px 2px var(--halo-glow-mid);
     }
   }
   @keyframes halo-rotate {

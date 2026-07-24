@@ -25,37 +25,97 @@ In Rust, an attribute macro sits **before** the function — literally _fore_ it
 1. **Code is the ornament.** No stock imagery. Beauty comes from typography, real code, mono labels, 1px rules, and generative particles.
 2. **The cursor performs.** Every interactive element reacts within 80 ms.
 3. **Facts over filler.** Every number on the site is real and verified.
-4. **Dark forge, warm signal.** A near-black void with one hot amber halo. Meaning-accents (rust orange, node green, cyan) appear only where their _meaning_ appears.
-5. **Fast, then fancy.** Content is readable with motion reduced; the site must feel instant.
+4. **Forge dual theme, warm signal.** Role tokens (`void`, `carbon`, `bone`, `halo`…) stay fixed; only their values flip. Dark is a near-black forge; light is **warm paper**, never cold gray SaaS. One amber halo is the hot signal in both. Meaning-accents (rust orange, node green, cyan) appear only where their _meaning_ appears.
+5. **System by default.** Appearance follows `prefers-color-scheme` unless the visitor overrides to light, dark, or system (persisted). First paint must match the resolved theme (no flash).
+6. **Fast, then fancy.** Content is readable with motion reduced; the site must feel instant.
 
 ---
 
 ## 2. Color System
 
-Tokens live in `src/index.css` `@theme` (Tailwind v4).
+### 2.1 Architecture
 
-| Token        | Hex                     | Usage                                                                          |
-| ------------ | ----------------------- | ------------------------------------------------------------------------------ |
-| `void`       | `#07080A`               | Page background                                                                |
-| `carbon`     | `#0D0F12`               | Panels, cards, code blocks                                                     |
-| `carbon-2`   | `#121519`               | Raised surfaces, palette                                                       |
-| `steel`      | `#1C2027`               | 1px borders, hairlines                                                         |
-| `steel-soft` | `#2A2F38`               | Hover borders, dashed "macro region" borders                                   |
-| `bone`       | `#EDE9DF`               | Primary text, warm paper white                                                 |
-| `ash`        | `#8B9098`               | Secondary text, comments (`// like this`)                                      |
-| `dim`        | `#4C525B`               | Line numbers, disabled, faint labels                                           |
-| `halo`       | `#FFB43A`               | **Primary signal.** Cursor ring, active states, key numbers, rail current step |
-| `halo-soft`  | `rgba(255,180,58,0.14)` | Halo glows, tag backgrounds, selection tint                                    |
-| `rust`       | `#FF5C28`               | Rust-side accent ONLY                                                          |
-| `node`       | `#8CC84B`               | JS/Node-side accent ONLY (generated `.js/.d.ts`, checkmarks)                   |
-| `wasi-cyan`  | `#6FE3F9`               | "Current" accent — live clock, HEAD chips, links to _now_                      |
-| `danger`     | `#FF4D4D`               | Diff deletions — used sparingly                                                |
+- **Role tokens** live as CSS custom properties on `html.dark` / `html.light` (with a dark pre-class fallback on `:root`). Names are **roles**, not materials: `bone` is “primary text”, even when it is dark ink on light paper.
+- **Tailwind utilities** map through `@theme { --color-void: var(--void); … }` so `bg-void`, `text-bone`, `border-steel` recolor automatically when the root class flips.
+- **shadcn mirrors** (`background`, `foreground`, `card`, `primary`…) alias the same forge vars.
+- **Chrome plate tokens** (`--forge-*`, `--nav-glass-*`, `--grain-*`) retune backdrop, navbar glass, and film grain per theme.
+- **Do not** fork pages with `dark:` / `light:` product styles. Prefer token values. JS that paints (canvas, heat maps) reads tokens via `getComputedStyle` / `readCssToken()` and re-renders on theme change.
 
-**Ratios**: ~85% void/carbon surfaces · ~10% bone/ash text · ~4% halo signal · ~1% rust/node/cyan meaning-accents.
+### 2.2 Theme runtime
 
-**Syntax palette** (code snippets only, `src/lib/highlight.ts`): keywords `halo`, types `wasi-cyan`, strings `node`, numbers `rust`, comments `dim`, punctuation `ash`, attributes always `halo` with a soft glow.
+| Piece      | Behavior                                                                                                                            |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Default    | `system` — OS `prefers-color-scheme`                                                                                                |
+| Override   | `light` \| `dark` \| `system`                                                                                                       |
+| Storage    | `localStorage` key `fh-theme` (`src/lib/theme.ts` → `THEME_STORAGE_KEY`)                                                            |
+| Root class | `html.dark` or `html.light` (via `next-themes` `attribute="class"`)                                                                 |
+| FOUC       | Blocking script in `index.html` applies the resolved class **before** first paint; keep resolve rules in sync with `resolveTheme()` |
+| UI         | Command palette: `theme: system` · `theme: dark` · `theme: light` (plus a cycle entry)                                              |
 
-**Background**: solid `void` + static **forge plate** (`PageBackdrop`) — ambient halo/cyan wells, edge-weighted modular grid (96/24px), corner registration marks, soft blueprint hatch, vignette. Film grain at 2–3% opacity above content. No animated canvas; depth without motion.
+Resolved theme always collapses to `light` or `dark`. `color-scheme` is set to match so native form controls and scrollbars agree.
+
+### 2.3 Token roles (both themes)
+
+| Token        | Role                                                         |
+| ------------ | ------------------------------------------------------------ |
+| `void`       | Page background                                              |
+| `carbon`     | Panels, cards, code blocks                                   |
+| `carbon-2`   | Raised surfaces, palette                                     |
+| `steel`      | 1px borders, hairlines                                       |
+| `steel-soft` | Hover borders, dashed "macro region" borders                 |
+| `bone`       | Primary text                                                 |
+| `ash`        | Secondary text, comments (`// like this`)                    |
+| `dim`        | Line numbers, disabled, faint labels                         |
+| `halo`       | **Primary signal.** Cursor ring, active states, key numbers  |
+| `halo-soft`  | Halo glows, tag backgrounds, selection tint                  |
+| `rust`       | Rust-side accent ONLY                                        |
+| `node`       | JS/Node-side accent ONLY (generated `.js/.d.ts`, checkmarks) |
+| `wasi-cyan`  | "Current" accent — live clock, HEAD chips, links to _now_    |
+| `danger`     | Diff deletions — used sparingly                              |
+
+### 2.4 Dark forge values
+
+| Token        | Value                   |
+| ------------ | ----------------------- |
+| `void`       | `#07080A`               |
+| `carbon`     | `#0D0F12`               |
+| `carbon-2`   | `#121519`               |
+| `steel`      | `#1C2027`               |
+| `steel-soft` | `#2A2F38`               |
+| `bone`       | `#EDE9DF`               |
+| `ash`        | `#8B9098`               |
+| `dim`        | `#4C525B`               |
+| `halo`       | `#FFB43A`               |
+| `halo-soft`  | `rgba(255,180,58,0.14)` |
+| `rust`       | `#FF5C28`               |
+| `node`       | `#8CC84B`               |
+| `wasi-cyan`  | `#6FE3F9`               |
+| `danger`     | `#FF4D4D`               |
+
+### 2.5 Light forge values (warm paper)
+
+| Token        | Value                                          |
+| ------------ | ---------------------------------------------- |
+| `void`       | `#F4F1EA`                                      |
+| `carbon`     | `#FFFDF8`                                      |
+| `carbon-2`   | `#EFEAE1`                                      |
+| `steel`      | `#DDD6C8`                                      |
+| `steel-soft` | `#C4BBAB`                                      |
+| `bone`       | `#14161A`                                      |
+| `ash`        | `#5A5F68`                                      |
+| `dim`        | `#8B9098`                                      |
+| `halo`       | `#C98512` (deeper amber for contrast on paper) |
+| `halo-soft`  | `rgba(201,133,18,0.14)`                        |
+| `rust`       | `#E04A1A`                                      |
+| `node`       | `#5A9E2E`                                      |
+| `wasi-cyan`  | `#1A9FB8`                                      |
+| `danger`     | `#D93636`                                      |
+
+**Ratios** (both themes): ~85% void/carbon surfaces · ~10% bone/ash text · ~4% halo signal · ~1% rust/node/cyan meaning-accents.
+
+**Syntax palette** (code snippets only, `src/lib/highlight.ts`): keywords `halo`, types `wasi-cyan`, strings `node`, numbers `rust`, comments `dim`, punctuation `ash`, attributes always `halo` with a soft glow (token-driven).
+
+**Background**: solid `void` + static **forge plate** (`PageBackdrop`) — ambient halo/cyan wells, edge-weighted modular grid (96/24px), corner registration marks, soft blueprint hatch, vignette — all driven by `--forge-*` vars. Film grain uses `--grain-opacity` / `--grain-blend` (overlay on dark, multiply on light). No animated canvas; depth without motion.
 
 ---
 
@@ -162,7 +222,7 @@ Fixed, height 56px. At rest: fully transparent (reads with the forge plate). Aft
 
 ### 8.3 Command Palette (`~` or ⌘K / Ctrl+K)
 
-Center-top overlay (`carbon-2`, 1px `steel`, radius 3px), opens with scale 0.98→1 + fade. Mono input, fuzzy-find with matched chars in `halo`. Commands: `open →` each page · `copy → email` (toast `✓ copied to clipboard`) · `cargo add forehalo` (prints playful cargo lines, then a toast popup with the contact address — no scrolling) · `motion → reduce / full` · `theme → void` (joke: `error[E0407]: light mode is not a member of trait Forge`). ESC closes; fully keyboard navigable.
+Center-top overlay (`carbon-2`, 1px `steel`, radius 3px), opens with scale 0.98→1 + fade. Mono input, fuzzy-find with matched chars in `halo`. Commands: `open →` each page · `copy → email` (toast `✓ copied to clipboard`) · `motion → reduce / full` · `theme → system | dark | light` (persists to `fh-theme`, follows OS when system). ESC closes; fully keyboard navigable.
 
 ### 8.4 AttributeChip
 
