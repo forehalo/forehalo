@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { HeroAttribute } from "@/pages/napi/hero-attribute";
+import { Ecosystem } from "@/pages/napi/ecosystem";
 import { Expander } from "@/pages/napi/expander";
 import { Anatomy } from "@/pages/napi/anatomy";
 import "@/pages/napi/napi.css";
@@ -10,7 +11,8 @@ import "@/pages/napi/napi.css";
  * page is structured like the macro's own pipeline:
  *   annotation (N1 the attribute — also carries the napi.rs/repo links) →
  *   expansion (N2 the Expander, pinned before/after morph) →
- *   anatomy (N3 annotated callouts).
+ *   anatomy (N3 annotated callouts) →
+ *   ecosystem (trusted-by logo grid).
  */
 
 const META_TITLE = "#[napi] — the macro that binds Rust to Node · Yii";
@@ -38,6 +40,8 @@ export default function Napi() {
       <Expander />
       <SectionRule slug="anatomy" />
       <Anatomy />
+      <SectionRule slug="ecosystem" />
+      <Ecosystem />
     </>
   );
 }
