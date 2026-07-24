@@ -52,6 +52,7 @@ export default function Landing() {
               } satisfies CSSProperties
             }
           >
+            <WhiteSpeckles wear={wear} />
             <div className="receipt-ink">
               <QrHeader />
               <ReceiptBody />
@@ -61,6 +62,48 @@ export default function Landing() {
         </div>
       </div>
     </WearCtx.Provider>
+  );
+}
+
+/** Sparse thermal flecks — a few white dots, stable per wear seed. */
+function WhiteSpeckles({ wear }: { wear: number }) {
+  const dots = useMemo(() => {
+    // 8–14 dots (slightly more when worn) — keep sparse
+    const n = 8 + Math.floor((wear / LANDING_VISIT_MAX) * 6);
+    const list: { left: string; top: string; size: number; opacity: number }[] = [];
+    for (let i = 0; i < n; i++) {
+      const hx = hash01(0x71a2 + wear * 97 + i * 31);
+      const hy = hash01(0x9e37 + wear * 53 + i * 17);
+      const hs = hash01(0xface + wear * 11 + i * 19);
+      const ho = hash01(0xbeef + wear * 7 + i * 13);
+      list.push({
+        left: `${4 + hx * 92}%`,
+        top: `${3 + hy * 94}%`,
+        size: 1 + hs * 3, // 1–4px
+        opacity: 0.35 + ho * 0.4,
+      });
+    }
+    return list;
+  }, [wear]);
+
+  return (
+    <span aria-hidden className="receipt-speckles">
+      {dots.map((d, i) => (
+        <span
+          key={i}
+          className="receipt-speckle"
+          style={
+            {
+              left: d.left,
+              top: d.top,
+              width: d.size,
+              height: d.size,
+              opacity: d.opacity,
+            } satisfies CSSProperties
+          }
+        />
+      ))}
+    </span>
   );
 }
 

@@ -60,6 +60,22 @@
   z-index: 1;
 }
 
+/* sparse white flecks (thermal dust / unprinted pinholes) */
+.receipt-speckles {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.receipt-speckle {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
 /*
   Mid-line print-head skip — a thin paper-colored bar cuts through the
   middle of a whole line (classic thermal “missing stripe”). Vars set
