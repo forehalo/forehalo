@@ -11,7 +11,8 @@
     "preview": "vp preview",
     "prepare": "vp config",
     "deploy": "wrangler deploy",
-    "gen:avatar-ascii": "node scripts/gen-avatar-ascii-image.mjs"
+    "gen:avatar-ascii": "node scripts/gen-avatar-ascii-image.mjs",
+    "gen:og": "node scripts/gen-og.mjs"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "^13.13.0",
