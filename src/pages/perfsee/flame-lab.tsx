@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
  * P3 · Flame lab — a CI build drawn as a flamegraph, full panel width.
  * Frames heat ash → halo → rust as the cursor sweeps the timeline; hovering
  * a frame reads out self/total time. Frames are a webpack production build
- * of the example app — illustrative (demo replay).
+ * of the example app — illustrative.
  */
 
 const BUILD_MS = 6540;

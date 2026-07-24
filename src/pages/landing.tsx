@@ -3,9 +3,12 @@ import { encodeQrMatrix, SITE_QR_PAYLOAD } from "@/lib/qr";
 import { INNER_HOME_PATH } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { COMMITS, logInvoiceAmount, parseLogMessage, type LogCommit } from "@/pages/home/log-data";
+import { LANDING_VISIT_MAX, recordLandingVisit } from "@/pages/landing/visit-count";
 import "@/pages/landing/receipt.css";
 import {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -22,35 +25,48 @@ import { Link } from "react-router";
  * barcode is a live QR for `https://thatyii.dev`; click / keyboard enters
  * the compiled-identity home at INNER_HOME_PATH.
  *
- * Body copy uses thermal print defects (skip lines, ghost/gap glyphs) —
- * see receipt.css + ThermalPrint.
+ * Visit count (`fh-landing-visits`, 0–10) only scales thermal fade/missing
+ * intensity — paper color stays fixed. See ThermalPrint + visit-count.ts.
  */
 
 const SCAN_LABEL = "click to scan";
 
+/** Wear level for this paint (0 fresh → 10 heavily faded thermal). */
+const WearCtx = createContext(0);
+
 export default function Landing() {
+  const wear = useMemo(() => recordLandingVisit(), []);
+  const wearT = wear / LANDING_VISIT_MAX;
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black">
-      <div className="flex min-h-full items-start justify-center px-3 py-6 sm:items-center sm:py-10">
-        <article
-          className="receipt-paper relative w-full max-w-[20rem] shrink-0 px-5 pb-7 pt-5 sm:max-w-[22rem] sm:px-6"
-          aria-label="entry receipt"
-        >
-          <div className="receipt-ink">
-            <QrHeader />
-            <ReceiptBody />
-            <Wordmark />
-          </div>
-        </article>
+    <WearCtx.Provider value={wear}>
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black">
+        <div className="flex min-h-full items-start justify-center px-3 py-6 sm:items-center sm:py-10">
+          <article
+            className="receipt-paper relative w-full max-w-[20rem] shrink-0 px-5 pb-7 pt-5 sm:max-w-[22rem] sm:px-6"
+            aria-label="entry receipt"
+            data-wear={wear}
+            style={
+              {
+                ["--receipt-wear" as string]: String(wearT),
+              } satisfies CSSProperties
+            }
+          >
+            <div className="receipt-ink">
+              <QrHeader />
+              <ReceiptBody />
+              <Wordmark />
+            </div>
+          </article>
+        </div>
       </div>
-    </div>
+    </WearCtx.Provider>
   );
 }
 
-/* ── thermal glyph defects ──────────────────────────────────────────── */
+/* ── thermal glyph defects (scale with visit wear) ──────────────────── */
 
-/** Wear that never fully erases a glyph — keep the receipt readable. */
-type Defect = "ok" | "ghost" | "faint" | "top" | "bottom" | "smudge";
+type Defect = "ok" | "ghost" | "faint" | "gap" | "top" | "bottom" | "smudge";
 
 /** Deterministic 32-bit hash → [0,1) so defects stay stable across re-renders. */
 function hash01(seed: number): number {
@@ -61,16 +77,21 @@ function hash01(seed: number): number {
   return x / 0x100000000;
 }
 
-function defectAt(lineSeed: number, index: number): Defect {
+/** wearT 0→10 visits as 0..1 — more defects, and gaps only when worn. */
+function defectAt(lineSeed: number, index: number, wearT: number): Defect {
   const r = hash01(lineSeed * 131 + index * 17 + 7);
-  // ~8% of glyphs get light wear (no full gaps).
-  if (r > 0.08) return "ok";
+  // fresh ~7%, max wear ~28% of glyphs
+  const rate = 0.07 + wearT * 0.21;
+  if (r > rate) return "ok";
+
   const kind = hash01(lineSeed * 59 + index * 41 + 3);
-  // Prefer soft fade over hard clip so text stays legible.
-  if (kind < 0.28) return "ghost";
-  if (kind < 0.55) return "faint";
-  if (kind < 0.7) return "top";
-  if (kind < 0.85) return "bottom";
+  // full drop only after a few visits; grows to ~30% of worn glyphs
+  const gapShare = wearT < 0.25 ? 0 : (wearT - 0.25) * 0.4;
+  if (kind < gapShare) return "gap";
+  if (kind < gapShare + 0.22) return "ghost";
+  if (kind < gapShare + 0.45) return "faint";
+  if (kind < gapShare + 0.62) return "top";
+  if (kind < gapShare + 0.78) return "bottom";
   return "smudge";
 }
 
@@ -84,9 +105,9 @@ function seedFrom(text: string): number {
 }
 
 /**
- * Renders a string with light thermal wear. Never fully drops a glyph;
- * skips adjacent defects so words stay readable. Full text in aria-label.
- * Some lines get a mid-height paper streak (print-head dead row).
+ * Thermal print with visit-scaled wear. Low visits: soft fade only.
+ * High visits: more ghosts, mid-line skips, occasional full gaps.
+ * Full original text stays in aria-label.
  */
 function ThermalPrint({
   text,
@@ -97,33 +118,45 @@ function ThermalPrint({
   className?: string;
   as?: "span" | "div";
 }) {
+  const wear = useContext(WearCtx);
+  const wearT = wear / LANDING_VISIT_MAX;
   const seed = useMemo(() => seedFrom(text), [text]);
+
   const glyphs = useMemo(() => {
     const chars = Array.from(text);
     let lastDefect = false;
+    // at high wear, allow adjacent defects sometimes (thermal blotches)
+    const allowAdjacent = wearT > 0.55;
     return chars.map((ch, i) => {
       if (ch === " " || ch === "\u00a0") {
         lastDefect = false;
         return { ch, defect: "ok" as Defect, key: i };
       }
-      let defect = defectAt(seed, i);
-      // no two worn glyphs in a row — keeps every word mostly intact
-      if (defect !== "ok" && lastDefect) defect = "ok";
+      let defect = defectAt(seed, i, wearT);
+      if (defect !== "ok" && lastDefect && !allowAdjacent) defect = "ok";
+      // even when adjacent allowed, never two full gaps in a row
+      if (defect === "gap" && lastDefect) {
+        const prev = chars[i - 1];
+        if (prev && prev !== " " && defectAt(seed, i - 1, wearT) === "gap") {
+          defect = "ghost";
+        }
+      }
       lastDefect = defect !== "ok";
       return { ch, defect, key: i };
     });
-  }, [text, seed]);
+  }, [text, seed, wearT]);
 
-  // ~28% of lines: a thin horizontal skip through the middle of the text
-  const midSkip = text.trim().length >= 4 && hash01(seed ^ 0x5f3759df) < 0.28;
+  // mid-line skip: ~20% fresh → ~58% at max wear
+  const midSkipRate = 0.2 + wearT * 0.38;
+  const midSkip = text.trim().length >= 4 && hash01(seed ^ 0x5f3759df) < midSkipRate;
+  // thicker skip band when worn (still ≤ 2px)
+  const skipH = 0.7 + wearT * 0.9 + hash01(seed ^ 22) * (0.4 + wearT * 0.3);
   const midSkipStyle = midSkip
     ? ({
-        // vary band position / thickness / horizontal span per line
-        ["--skip-top" as string]: `${42 + hash01(seed ^ 11) * 14}%`,
-        // 0.75–1.75px — never thicker than 2px
-        ["--skip-h" as string]: `${0.75 + hash01(seed ^ 22) * 1}px`,
-        ["--skip-left" as string]: `${4 + hash01(seed ^ 33) * 18}%`,
-        ["--skip-right" as string]: `${4 + hash01(seed ^ 44) * 18}%`,
+        ["--skip-top" as string]: `${40 + hash01(seed ^ 11) * (12 + wearT * 8)}%`,
+        ["--skip-h" as string]: `${Math.min(2, skipH)}px`,
+        ["--skip-left" as string]: `${2 + hash01(seed ^ 33) * (12 + wearT * 10)}%`,
+        ["--skip-right" as string]: `${2 + hash01(seed ^ 44) * (12 + wearT * 10)}%`,
       } satisfies CSSProperties)
     : undefined;
 

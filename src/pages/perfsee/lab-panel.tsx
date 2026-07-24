@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 /**
  * LabPanel — the shared instrument chrome for the /perfsee measurement lab.
- * A carbon panel with a mono header strip (instrument name · sample id ·
- * `demo replay`), the instrument body, and a live readout strip at the
- * bottom that children drive through `readout`.
+ * A carbon panel with a mono header strip (instrument name · sample id),
+ * the instrument body, and a live readout strip at the bottom that children
+ * drive through `readout`.
  */
 export function LabPanel({
   title,
@@ -51,12 +51,7 @@ export function LabPanel({
           <span className="hud text-[10px] text-ash">{title}</span>
           {controls}
         </div>
-        <div className="flex items-center gap-3">
-          <span className="micro text-dim">{sample}</span>
-          <span className="micro rounded-[2px] border border-steel px-1.5 py-0.5 text-dim">
-            demo replay
-          </span>
-        </div>
+        <span className="micro text-dim">{sample}</span>
       </div>
 
       {/* instrument body */}

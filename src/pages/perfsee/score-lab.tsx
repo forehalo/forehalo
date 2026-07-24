@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
  * P4 · Score lab — the lighthouse-style score, self-hosted. A 270° gauge
  * sweeps 0 → 98 (node green, countUp) ringed by gauge ticks; beside it the
  * four lab metrics hold their budgets. Hovering a metric reads its budget
- * line. Figures illustrative (demo replay).
+ * line. Figures illustrative.
  */
 
 const TARGET = 98;

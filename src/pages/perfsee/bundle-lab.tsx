@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
  * is a heat scale (halo = heaviest offender), hover inspects a module and a
  * sibling module table stays in sync. A `baseline ⇄ this pr` toggle replays
  * Perfsee's signature move — the bundle diff on every PR: changed modules
- * light up with their ±kB deltas. All figures are illustrative (demo replay).
+ * light up with their ±kB deltas. All figures are illustrative.
  */
 
 interface Mod {

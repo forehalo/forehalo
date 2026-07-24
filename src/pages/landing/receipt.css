@@ -1,9 +1,12 @@
 /*
   Thermal receipt print defects — skip lines, head wear, ghost ink.
-  Scoped to the receipt gate only (not the forge design system).
+  `--receipt-wear` (0–1 from visit count) only scales fade intensity;
+  paper/ink colors stay fixed. No crumple / yellowing.
 */
 
 .receipt-paper {
+  --receipt-wear: 0;
+
   /* thermal stock is never pure white */
   background-color: #f4f1ea;
   color: #1a1814;
@@ -13,7 +16,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
-/* light print-head streaks — soft enough that body copy stays readable */
+/* light print-head streaks — a bit denser when wear is high */
 .receipt-paper::before {
   content: "";
   position: absolute;
@@ -36,16 +39,17 @@
       transparent 41px 88px
     );
   mix-blend-mode: normal;
+  opacity: calc(1 + var(--receipt-wear) * 0.35);
 }
 
-/* fine noise / dust on the stock */
+/* fine noise / dust on the stock — slightly stronger when worn */
 .receipt-paper::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  opacity: 0.18;
+  opacity: calc(0.16 + var(--receipt-wear) * 0.14);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
   mix-blend-mode: multiply;
@@ -89,7 +93,7 @@ span.receipt-line--mid-skip {
   z-index: 2;
 }
 
-/* per-glyph thermal defects (see ThermalPrint) — light wear only */
+/* per-glyph thermal defects (see ThermalPrint) — harsher as --receipt-wear rises */
 .receipt-glyph {
   display: inline-block;
   white-space: pre;
@@ -98,27 +102,32 @@ span.receipt-line--mid-skip {
 }
 
 .receipt-glyph--ghost {
-  opacity: 0.55;
+  opacity: calc(0.58 - var(--receipt-wear) * 0.28);
 }
 
 .receipt-glyph--faint {
-  opacity: 0.72;
+  opacity: calc(0.78 - var(--receipt-wear) * 0.22);
 }
 
-/* thin slice — glyph still readable */
+/* full thermal drop — only assigned at higher visit wear */
+.receipt-glyph--gap {
+  opacity: 0;
+}
+
+/* slice — deeper cut when worn */
 .receipt-glyph--top {
-  clip-path: inset(0 0 22% 0);
-  opacity: 0.9;
+  clip-path: inset(0 0 calc(18% + var(--receipt-wear) * 18%) 0);
+  opacity: calc(0.92 - var(--receipt-wear) * 0.12);
 }
 
 .receipt-glyph--bottom {
-  clip-path: inset(22% 0 0 0);
-  opacity: 0.9;
+  clip-path: inset(calc(18% + var(--receipt-wear) * 18%) 0 0 0);
+  opacity: calc(0.92 - var(--receipt-wear) * 0.12);
 }
 
 .receipt-glyph--smudge {
-  opacity: 0.78;
-  transform: scaleY(1.04);
+  opacity: calc(0.82 - var(--receipt-wear) * 0.18);
+  transform: scaleY(calc(1.03 + var(--receipt-wear) * 0.04));
   transform-origin: bottom center;
 }
 
