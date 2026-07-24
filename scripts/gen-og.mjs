@@ -1,6 +1,6 @@
 /**
  * Generate public/og.png (1200×630) for Open Graph / X cards.
- * Usage: node scripts/gen-og.mjs
+ * Usage: node scripts/gen-og.mjs  (or pnpm gen:og)
  */
 import { Jimp, rgbaToInt } from "jimp";
 import path from "node:path";
@@ -12,34 +12,29 @@ const root = path.resolve(__dirname, "..");
 const W = 1200;
 const H = 630;
 const VOID = rgbaToInt(0x07, 0x08, 0x0a, 255);
-const CARBON = rgbaToInt(0x0d, 0x0f, 0x12, 255);
 const HALO = rgbaToInt(0xff, 0xb4, 0x3a, 255);
 const BONE = rgbaToInt(0xed, 0xe9, 0xdf, 255);
 
+function blend(dst, src, a) {
+  if (a <= 0) return dst;
+  if (a >= 1) return src;
+  const dr = (dst >> 24) & 255;
+  const dg = (dst >> 16) & 255;
+  const db = (dst >> 8) & 255;
+  const sr = (src >> 24) & 255;
+  const sg = (src >> 16) & 255;
+  const sb = (src >> 8) & 255;
+  return rgbaToInt(
+    Math.round(dr + (sr - dr) * a),
+    Math.round(dg + (sg - dg) * a),
+    Math.round(db + (sb - db) * a),
+    255,
+  );
+}
+
+// Full card is forge void black — no carbon plate (keeps avatar plate seamless)
 const out = new Jimp({ width: W, height: H, color: VOID });
 const pad = 48;
-
-for (let y = pad; y < H - pad; y++) {
-  for (let x = pad; x < W - pad; x++) {
-    out.setPixelColor(CARBON, x, y);
-  }
-}
-
-for (let y = pad; y < H - pad; y++) {
-  for (let x = pad; x < W - pad; x++) {
-    const nx = (x - W / 2) / ((W - 2 * pad) / 2);
-    const ny = (y - H / 2) / ((H - 2 * pad) / 2);
-    const d = Math.sqrt(nx * nx * 0.55 + ny * ny);
-    if (d > 0.72) {
-      const t = Math.min(1, (d - 0.72) / 0.45);
-      const p = out.getPixelColor(x, y);
-      const r = ((p >> 24) & 255) * (1 - t) + 0x07 * t;
-      const g = ((p >> 16) & 255) * (1 - t) + 0x08 * t;
-      const b = ((p >> 8) & 255) * (1 - t) + 0x0a * t;
-      out.setPixelColor(rgbaToInt(r | 0, g | 0, b | 0, 255), x, y);
-    }
-  }
-}
 
 const frame = 2;
 for (let x = pad; x < W - pad; x++) {
@@ -71,18 +66,42 @@ corner(W - cOff - 1, cOff, -1, 1);
 corner(cOff, H - cOff - 1, 1, -1);
 corner(W - cOff - 1, H - cOff - 1, -1, -1);
 
+/*
+  Avatar: the source is a circular character on a white square.
+  Hard white-keying kills the white face and leaves fringe.
+  Use a soft circular mask so face whites stay; only outside the circle is cut.
+*/
+// Avatar: plate white outside the green disc → void black (card bg).
+// Face/eye whites are inside the disc and stay white.
 const avatar = await Jimp.read(path.join(root, "public/avatars/yii.jpg"));
-const avatarSize = 360;
+const avatarSize = 380;
 avatar.resize({ w: avatarSize, h: avatarSize });
-const ax = 140;
+const ax = 130;
 const ay = Math.floor((H - avatarSize) / 2);
+const acx = (avatarSize - 1) / 2;
+const acy = (avatarSize - 1) / 2;
+const greenR = avatarSize * 0.392;
+
 for (let y = 0; y < avatarSize; y++) {
   for (let x = 0; x < avatarSize; x++) {
     const p = avatar.getPixelColor(x, y);
     const r = (p >> 24) & 255;
     const g = (p >> 16) & 255;
     const b = (p >> 8) & 255;
-    if ((r + g + b) / 3 > 245) continue;
+    const lum = (r + g + b) / 3;
+    const sat = Math.max(r, g, b) - Math.min(r, g, b);
+    const dist = Math.sqrt((x - acx) ** 2 + (y - acy) ** 2);
+
+    // Outside green disc: white / pale plate → void (skip, card is already VOID)
+    if (dist > greenR) {
+      if (lum > 170 && sat < 50) continue;
+      // keep dark brim / hood that sticks past the green
+    }
+
+    // Outer ring of the disc: plate-white AA fringe → void (face whites are more central)
+    if (dist > greenR * 0.8 && lum > 235 && sat < 18) continue;
+    if (dist > greenR * 0.88 && lum > 210 && sat < 30) continue;
+
     out.setPixelColor(p, ax + x, ay + y);
   }
 }
