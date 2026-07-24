@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * CodeBlock (design.md §8.6): carbon panel, filename tab, line numbers (dim),
- * 14px code in the §2 syntax palette, `#[read]` halo-cursor state, copy
- * button (`copy` → `copied ✓`). Optional fold region renders a dashed gutter
+ * 14px code in the §2 syntax palette, copy button (`copy` → `copied ✓`).
+ * Optional fold region renders a dashed gutter
  * marker ("// … N lines you didn't have to write") that macroExpands.
  *
  * `code` (string, highlighted via `lang`) or `lines` (pre-built ReactNode

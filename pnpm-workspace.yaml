@@ -9,7 +9,6 @@ catalog:
 # Versions below were published <24h before 2026-07-20 and trip pnpm 11's
 # minimumReleaseAge gate; exclusions can be removed after 2026-07-21.
 minimumReleaseAgeExclude:
-  - "@radix-ui/*"
   - typescript
   - oxlint-tsgolint
 overrides:

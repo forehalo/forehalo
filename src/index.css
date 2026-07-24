@@ -351,26 +351,12 @@ html.light .forge-liquid-glass {
     color: var(--bone);
   }
 
-  /* Focus looks like the cursor's halo (design.md §9) */
+  /* Focus looks like the forge halo ring (design.md §9) */
   :focus-visible {
     outline: 2px solid var(--halo);
     outline-offset: 2px;
     box-shadow: 0 0 0 4px var(--halo-soft);
     border-radius: 2px;
-  }
-
-  /* Halo cursor replaces native cursor on fine pointers only */
-  @media (pointer: fine) {
-    body.halo-cursor-active,
-    body.halo-cursor-active a,
-    body.halo-cursor-active button,
-    body.halo-cursor-active [role="button"],
-    body.halo-cursor-active input,
-    body.halo-cursor-active textarea,
-    body.halo-cursor-active select,
-    body.halo-cursor-active label {
-      cursor: none;
-    }
   }
 
   /* Keyframes referenced via inline styles (Tailwind only emits keyframes for
@@ -382,11 +368,6 @@ html.light .forge-liquid-glass {
     }
     50% {
       box-shadow: 0 0 12px 2px var(--halo-glow-mid);
-    }
-  }
-  @keyframes halo-rotate {
-    to {
-      transform: rotate(360deg);
     }
   }
 

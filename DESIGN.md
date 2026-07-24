@@ -121,10 +121,10 @@ Resolved theme always collapses to `light` or `dark`. `color-scheme` is set to m
 
 ## 3. Typography
 
-**Fonts (Google Fonts, `font-display: swap`):**
+**Fonts (self-hosted under `public/fonts/`, `font-display: swap`):**
 
 - **Space Grotesk** (500/700) — display headlines, page titles. Geometric, engineered, warm.
-- **JetBrains Mono** (400/500/700, ligatures ON) — code, labels, HUD, nav, buttons, captions. The site's native voice.
+- **JetBrains Mono** (400/500/700, italic 400, ligatures ON) — code, labels, HUD, nav, buttons, captions. The site's native voice.
 
 **Type scale** (desktop; clamps to mobile):
 
@@ -153,23 +153,9 @@ Resolved theme always collapses to `light` or `dark`. `color-scheme` is set to m
 
 ---
 
-## 5. The Halo Cursor (signature system)
+## 5. Link hover frame
 
-Replaces the native cursor on fine-pointer devices (`body.halo-cursor-active`). Touch devices: native behavior; expansions trigger on tap.
-
-**Anatomy**: 26px diameter ring, 1.5px `bone`@60% stroke; 3px `halo` center dot. 60fps transform-only movement, ~180ms trailing ease (lerp 0.18) so it glides like a presence, not a pointer. **The ring never explains itself — no attribute tag labels, no hint chips.**
-
-**States**, driven by `data-cursor` attributes on hovered elements (each morphs the ring geometry, 180ms expo-out):
-
-| `data-cursor` | Context                   | Ring behavior                                   |
-| ------------- | ------------------------- | ----------------------------------------------- |
-| —             | Default                   | 26px ring                                       |
-| `link`        | Links, buttons            | Morphs toward element bounds                    |
-| `expand`      | Expandable (macro region) | Grows, stroke dashed, slow rotation             |
-| `read`        | Code block                | Ring splits into a caret pair hugging the block |
-| `move`        | Draggable token           | Pinches, dot becomes crosshair                  |
-| `ffi`         | Rust ⇄ JS boundary        | Ellipse tinted `rust`→`node` by x-position      |
-| `sync`        | CRDT presence demo        | Collaborator color band                         |
+Native cursor stays. On fine-pointer devices, elements marked `data-cursor="link"` (buttons, nav links, CTAs) get a pinned 1.5px `bone`@60% square frame inset −4px around the target bounds (`LinkFrame` in layout). Touch devices: native hover/tap only. Other historical `data-cursor` values may remain in markup as no-ops.
 
 **Selection**: text selection is `halo-soft` background with `bone` text.
 
@@ -267,7 +253,7 @@ Per-section title (`display-lg`, or `display-md` + `font-mono` for compact/comma
 
 ## 11. Dependencies
 
-`react@19`, `typescript`, `vite` (vite-plus), `tailwindcss@4` (theme in `src/index.css`, no config file), `shadcn/ui` primitives (new-york, restyled), `framer-motion` (all UI/reveal/scroll-linked animation), `lenis` (smooth scroll), Google Fonts (Space Grotesk, JetBrains Mono). No GSAP, no Three.js — effects are SVG/CSS (and cursor canvas only).
+`react@19`, `typescript`, `vite` (vite-plus), `tailwindcss@4` (theme in `src/index.css`, no config file), hand-rolled chrome components (no vendored shadcn `ui/` tree), `framer-motion` (all UI/reveal/scroll-linked animation), `lenis` (smooth scroll), self-hosted Space Grotesk + JetBrains Mono (`public/fonts/`). No GSAP, no Three.js — effects are SVG/CSS (and cursor canvas only).
 
 ---
 

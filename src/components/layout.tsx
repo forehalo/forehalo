@@ -3,7 +3,7 @@ import { Outlet, useLocation } from "react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { HaloCursor } from "@/components/halo-cursor";
+import { LinkFrame } from "@/components/link-frame";
 import { PageBackdrop } from "@/components/page-backdrop";
 import { CommandPaletteProvider } from "@/components/command-palette";
 import { ToastProvider } from "@/components/toaster";
@@ -24,7 +24,7 @@ import { EASE_COMPILE_OUT } from "@/lib/motion";
  * exception: no Footer. Full-bleed heroes opt out inside the page with a
  * negative top margin (-mt-14).
  *
- * Includes: Navbar (TopBar), Footer, HaloCursor overlay, static forge-plate
+ * Includes: Navbar (TopBar), Footer, link/button hover frame, static forge-plate
  * backdrop, grain overlay, command palette, Lenis smooth scroll, and the
  * "recompile wipe" page transition.
  */
@@ -72,7 +72,7 @@ export function Layout() {
               }}
             />
 
-            <HaloCursor />
+            <LinkFrame />
           </CommandPaletteProvider>
         </SmoothScrollProvider>
       </ToastProvider>

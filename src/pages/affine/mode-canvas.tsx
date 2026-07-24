@@ -83,7 +83,7 @@ const BLOCKS: BlockDef[] = [
     title: "powered by y-octo",
     body: (
       <>
-        his Rust port of Yjs, integrated as the CRDT engine — <EngineStoryLink />
+        my Rust port of Yjs, integrated as the CRDT engine — <EngineStoryLink />
       </>
     ),
   },
@@ -140,7 +140,6 @@ export function ModeCanvas() {
               aria-selected={mode === m}
               onClick={() => setMode(m)}
               data-cursor="link"
-              data-magnetic
               className={cn(
                 "flex items-center gap-2 rounded-[2px] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors duration-200 ease-compile-out",
                 mode === m ? "bg-halo-soft text-halo" : "text-ash hover:text-bone",

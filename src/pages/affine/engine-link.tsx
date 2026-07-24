@@ -9,7 +9,7 @@ import { EASE_COMPILE_OUT } from "@/lib/motion";
 
 /**
  * A4 · Engine — "the rust engine" (id: engine).
- * y-octo — his Rust port of Yjs — integrated into AFFiNE as the CRDT engine.
+ * y-octo — my Rust port of Yjs — integrated into AFFiNE as the CRDT engine.
  * The section is the y-octo description, a pointer to the engine's repo,
  * and the `cargo test` Yjs-compat readout (illustrative).
  */

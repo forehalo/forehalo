@@ -218,7 +218,6 @@ export function BundleLab() {
                 key={m}
                 type="button"
                 data-cursor="link"
-                data-magnetic
                 aria-pressed={mode === m}
                 onClick={() => setMode(m)}
                 className={cn(

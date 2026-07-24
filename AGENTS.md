@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-forehalo — a personal portfolio site styled as a Rust workspace/IDE ("compiled identity"). Pages are "crates", sections are `.rs` files in a compile log, page transitions are a "recompile wipe". React 19 + TypeScript + Tailwind CSS v4 + shadcn/ui (new-york style).
+forehalo — a personal portfolio site styled as a Rust workspace/IDE ("compiled identity"). Pages are "crates", sections are `.rs` files in a compile log, page transitions are a "recompile wipe". React 19 + TypeScript + Tailwind CSS v4. Site chrome and page sections are hand-rolled (no shadcn `ui/` scaffold in tree).
 
 ## Commands
 
@@ -31,11 +31,11 @@ Toolchain notes:
 
 ### Layout owns chrome and offsets
 
-`Layout` (src/components/layout.tsx) renders the global chrome — Navbar (TopBar), Footer, HaloCursor, command palette, static forge-plate backdrop (`PageBackdrop`), grain overlay — and the matching content offset: TopBar is fixed 56px (`pt-14`). Pages start below the bar automatically; do not add nav-height padding in pages. Full-bleed heroes opt out with `-mt-14`. (The left BuildRail progress sidebar was removed from every page, along with its section registry — `src/hooks/use-sections.tsx` is gone. No animated canvas backdrop.)
+`Layout` (src/components/layout.tsx) renders the global chrome — Navbar (TopBar), Footer, link hover frame (`LinkFrame` on `data-cursor="link"`), command palette, static forge-plate backdrop (`PageBackdrop`), grain overlay — and the matching content offset: TopBar is fixed 56px (`pt-14`). Pages start below the bar automatically; do not add nav-height padding in pages. Full-bleed heroes opt out with `-mt-14`. (The left BuildRail progress sidebar was removed from every page, along with its section registry — `src/hooks/use-sections.tsx` is gone. No animated canvas backdrop. No custom cursor overlay.)
 
 Provider nesting order in Layout: `MotionProvider → ToastProvider → SmoothScrollProvider (Lenis) → CommandPaletteProvider`.
 
-`main.tsx` deliberately omits `React.StrictMode` — it double-runs canvas/cursor effects.
+`main.tsx` deliberately omits `React.StrictMode` — it double-runs some layout effects.
 
 ### Motion system
 
@@ -46,13 +46,13 @@ Provider nesting order in Layout: `MotionProvider → ToastProvider → SmoothSc
 
 ### Design tokens
 
-All tokens live in `src/index.css` (Tailwind v4 `@theme` aliases → CSS vars on `html.dark` / `html.light`): dual forge palette, system default via `prefers-color-scheme` + `fh-theme` override (`next-themes`, FOUC bootstrap in `index.html`). Role names stay fixed (`void`/`bone`/`halo`…); values flip. Space Grotesk + JetBrains Mono (ligatures on), 2–3px radii. Custom utilities: `hud`, `micro`, `blueprint-grid`, `halo-glow-hover`, `macro-region`. HaloCursor replaces the native cursor on fine pointers via `body.halo-cursor-active`. See DESIGN.md §1–§2.
+All tokens live in `src/index.css` (Tailwind v4 `@theme` aliases → CSS vars on `html.dark` / `html.light`): dual forge palette, system default via `prefers-color-scheme` + `fh-theme` override (`next-themes`, FOUC bootstrap in `index.html`). Role names stay fixed (`void`/`bone`/`halo`…); values flip. Space Grotesk + JetBrains Mono (ligatures on), 2–3px radii. Custom utilities: `hud`, `micro`, `blueprint-grid`, `halo-glow-hover`, `macro-region`. Clickable chrome marked `data-cursor="link"` gets a pinned bone square frame on hover (fine pointers only); native cursor stays. See DESIGN.md §1–§2.
 
 Code snippets on pages use the hand-rolled tokenizer in `src/lib/highlight.ts` (implements the site's syntax palette; deliberately not a general highlighter).
 
 ### Page structure
 
-Each route has a thin page component in `src/pages/<name>.tsx` that composes section components from `src/pages/<name>/`. shadcn/ui primitives live in `src/components/ui/` (config in `components.json`, lucide icons).
+Each route has a thin page component in `src/pages/<name>.tsx` that composes section components from `src/pages/<name>/`. Shared chrome lives in `src/components/` (layout, navbar, footer, motion primitives, etc.). Do not reintroduce an unused shadcn `ui/` kit.
 
 ### Spec references in comments
 

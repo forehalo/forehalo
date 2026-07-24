@@ -20,7 +20,6 @@ export const HaloButton = forwardRef<
     <button
       ref={ref}
       data-cursor="link"
-      data-magnetic
       className={cn(
         "group inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] transition-all duration-200 ease-compile-out active:scale-[0.97]",
         variant === "primary" &&
