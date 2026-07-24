@@ -166,6 +166,20 @@
   border-radius: 3px;
 }
 
+@utility forge-liquid-glass {
+  /*
+    Scrolled TopBar material — macOS liquid glass stack:
+    ultra-translucent tint + blur/saturate/brightness refraction +
+    multi-layer inset light + depth shadow. No edge borders (inset ring
+    in the shadow stack carries the specular edge).
+  */
+  background: var(--nav-glass-bg);
+  border: none;
+  box-shadow: var(--nav-glass-shadow);
+  backdrop-filter: var(--nav-glass-filter);
+  -webkit-backdrop-filter: var(--nav-glass-filter);
+}
+
 /* ── Dual-theme forge palette (design.md §2) ─────────────────────────── */
 
 @layer base {
@@ -205,15 +219,15 @@
     --forge-hatch: rgba(139, 144, 152, 0.55);
     --forge-hatch-opacity: 0.07;
     --forge-vignette: rgba(7, 8, 10, 0.55);
-    --nav-glass-bg: rgba(255, 255, 255, 0.06);
-    --nav-glass-bg-support: rgba(255, 255, 255, 0.05);
-    --nav-glass-border: rgba(255, 255, 255, 0.1);
-    --nav-glass-btn-border: rgba(255, 255, 255, 0.15);
-    --nav-glass-btn-bg: rgba(255, 255, 255, 0.04);
-    --nav-glass-specular: rgba(255, 255, 255, 0.25);
+    /* Liquid glass (scrolled TopBar) — macOS-style refraction stack */
+    --nav-glass-bg: rgba(255, 255, 255, 0.08);
+    --nav-glass-border: rgba(255, 255, 255, 0.4);
+    --nav-glass-filter: blur(8px) saturate(220%) brightness(1.05);
+    --nav-glass-btn-border: rgba(255, 255, 255, 0.35);
+    --nav-glass-btn-bg: rgba(255, 255, 255, 0.1);
     --nav-glass-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 0 rgba(255, 255, 255, 0.04),
-      0 8px 32px -12px rgba(0, 0, 0, 0.45);
+      inset 0 4px 12px rgba(255, 255, 255, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 12px 40px rgba(0, 0, 0, 0.15);
     --grain-opacity: 0.028;
     --grain-blend: overlay;
   }
@@ -246,15 +260,14 @@
     --forge-hatch: rgba(139, 144, 152, 0.55);
     --forge-hatch-opacity: 0.07;
     --forge-vignette: rgba(7, 8, 10, 0.55);
-    --nav-glass-bg: rgba(255, 255, 255, 0.06);
-    --nav-glass-bg-support: rgba(255, 255, 255, 0.05);
-    --nav-glass-border: rgba(255, 255, 255, 0.1);
-    --nav-glass-btn-border: rgba(255, 255, 255, 0.15);
-    --nav-glass-btn-bg: rgba(255, 255, 255, 0.04);
-    --nav-glass-specular: rgba(255, 255, 255, 0.25);
+    --nav-glass-bg: rgba(255, 255, 255, 0.08);
+    --nav-glass-border: rgba(255, 255, 255, 0.4);
+    --nav-glass-filter: blur(8px) saturate(220%) brightness(1.05);
+    --nav-glass-btn-border: rgba(255, 255, 255, 0.35);
+    --nav-glass-btn-bg: rgba(255, 255, 255, 0.1);
     --nav-glass-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 0 rgba(255, 255, 255, 0.04),
-      0 8px 32px -12px rgba(0, 0, 0, 0.45);
+      inset 0 4px 12px rgba(255, 255, 255, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 12px 40px rgba(0, 0, 0, 0.15);
     --grain-opacity: 0.028;
     --grain-blend: overlay;
   }
@@ -288,15 +301,15 @@
     --forge-hatch: rgba(90, 95, 104, 0.4);
     --forge-hatch-opacity: 0.06;
     --forge-vignette: rgba(244, 241, 234, 0.72);
-    --nav-glass-bg: rgba(20, 22, 26, 0.05);
-    --nav-glass-bg-support: rgba(20, 22, 26, 0.04);
-    --nav-glass-border: rgba(20, 22, 26, 0.1);
+    /* same glass recipe, slightly denser so it reads on warm paper */
+    --nav-glass-bg: rgba(255, 255, 255, 0.45);
+    --nav-glass-border: rgba(255, 255, 255, 0.65);
+    --nav-glass-filter: blur(8px) saturate(180%) brightness(1.03);
     --nav-glass-btn-border: rgba(20, 22, 26, 0.12);
-    --nav-glass-btn-bg: rgba(20, 22, 26, 0.04);
-    --nav-glass-specular: rgba(255, 255, 255, 0.55);
+    --nav-glass-btn-bg: rgba(255, 255, 255, 0.55);
     --nav-glass-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 0 rgba(20, 22, 26, 0.04),
-      0 8px 32px -12px rgba(20, 22, 26, 0.12);
+      inset 0 4px 12px rgba(255, 255, 255, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+      0 12px 40px rgba(20, 22, 26, 0.1);
     --grain-opacity: 0.035;
     --grain-blend: multiply;
   }

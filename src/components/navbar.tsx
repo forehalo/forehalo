@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router";
+import { useLocation } from "react-router";
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons";
 import { useCommandPalette } from "@/components/command-palette";
 import { cn } from "@/lib/utils";
@@ -11,16 +11,12 @@ import { cn } from "@/lib/utils";
  * its content slot. Pages must not add their own offsets.
  *
  * Material: fully transparent at rest (reads as part of the forge plate).
- * After scroll (>24px): liquid-glass — blur + saturate, translucent fill,
- * specular top edge. Tint tokens (`--nav-glass-*`) flip with light/dark.
+ * After scroll (>24px): `forge-liquid-glass` — ultra-translucent tint,
+ * blur + saturate + brightness refraction, multi-layer inset light. Tokens in
+ * `src/index.css` (`--nav-glass-*`) flip with light/dark.
+ *
+ * Page routes live in the command palette / footer — not as TopBar links.
  */
-
-const ROUTES = [
-  { path: "/", label: "Index" },
-  { path: "/napi", label: "#[napi]" },
-  { path: "/affine", label: "AFFiNE" },
-  { path: "/perfsee", label: "Perfsee" },
-];
 
 export function Navbar() {
   return <TopBar />;
@@ -43,33 +39,10 @@ function TopBar() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-9000 h-14 border-b transition-[background-color,border-color,box-shadow,backdrop-filter,-webkit-backdrop-filter] duration-300 ease-out",
-        scrolled
-          ? "backdrop-blur-2xl backdrop-saturate-150"
-          : "border-transparent bg-transparent shadow-none backdrop-blur-none",
+        "fixed inset-x-0 top-0 z-9000 h-14 transition-[background-color,border-color,box-shadow,backdrop-filter,-webkit-backdrop-filter] duration-300 ease-out",
+        scrolled ? "forge-liquid-glass" : "border-0 bg-transparent shadow-none backdrop-blur-none",
       )}
-      style={
-        scrolled
-          ? {
-              borderColor: "var(--nav-glass-border)",
-              backgroundColor: "var(--nav-glass-bg)",
-              boxShadow: "var(--nav-glass-shadow)",
-            }
-          : undefined
-      }
     >
-      {/* specular wash — only when glass is on; mimics Liquid Glass highlight */}
-      {scrolled && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, transparent, var(--nav-glass-specular), transparent)",
-          }}
-        />
-      )}
-
       <div className="relative flex h-full items-center justify-between gap-4 pl-4 pr-4 lg:px-6">
         {/* left: branding (hidden on home — the hero owns the name there) */}
         {pathname !== "/" ? (
@@ -79,27 +52,6 @@ function TopBar() {
             Yii
           </span>
         )}
-
-        {/* center: nav links */}
-        <div className="hidden min-w-0 items-center gap-6 md:flex">
-          <nav className="flex items-center gap-1" aria-label="pages">
-            {ROUTES.map((r) => (
-              <NavLink
-                key={r.path}
-                to={r.path}
-                data-cursor="link"
-                className={({ isActive }) =>
-                  cn(
-                    "rounded-[2px] px-2 py-1 font-mono text-[11px] transition-colors",
-                    isActive ? "bg-halo-soft text-halo" : "text-dim hover:text-bone",
-                  )
-                }
-              >
-                {r.label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
 
         {/* right: socials · palette hint */}
         <div className="flex shrink-0 items-center gap-3">
