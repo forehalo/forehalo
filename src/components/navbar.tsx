@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons";
 import { useCommandPalette } from "@/components/command-palette";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
  * `src/index.css` (`--nav-glass-*`) flip with light/dark.
  *
  * Page routes live in the command palette / footer — not as TopBar links.
+ * Horizontal padding is fixed `--forge-inset` so brand / chrome align with the
+ * forge plate registration marks (corner L-brackets).
  */
 
 export function Navbar() {
@@ -39,14 +41,26 @@ function TopBar() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-9000 h-14 transition-[background-color,border-color,box-shadow,backdrop-filter,-webkit-backdrop-filter] duration-300 ease-out",
-        scrolled ? "forge-liquid-glass" : "border-0 bg-transparent shadow-none backdrop-blur-none",
+        /* do not use Tailwind backdrop-blur-* here — it rewrites backdrop-filter
+           via --tw-backdrop-* composites and fights the real glass stack in prod */
+        "fixed inset-x-0 top-0 z-9000 h-14 transition-[background-color,box-shadow] duration-300 ease-out",
+        scrolled ? "forge-liquid-glass" : "border-0 bg-transparent shadow-none",
       )}
     >
-      <div className="relative flex h-full items-center justify-between gap-4 pl-4 pr-4 lg:px-6">
-        {/* left: branding (hidden on home — the hero owns the name there) */}
+      <div
+        className="relative flex h-full items-center justify-between gap-4"
+        style={{ paddingLeft: "var(--forge-inset)", paddingRight: "var(--forge-inset)" }}
+      >
+        {/* left: branding → home (hidden on home — the hero owns the name there) */}
         {pathname !== "/" ? (
-          <span className="hud shrink-0 text-bone">Yii</span>
+          <Link
+            to="/"
+            data-cursor="link"
+            className="hud shrink-0 text-bone transition-colors hover:text-halo"
+            aria-label="Yii — home"
+          >
+            Yii
+          </Link>
         ) : (
           <span aria-hidden className="hud shrink-0 text-transparent">
             Yii

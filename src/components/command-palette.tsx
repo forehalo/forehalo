@@ -133,7 +133,7 @@ function PaletteOverlay() {
 
   const commands = useMemo<Cmd[]>(
     () => [
-      { id: "open-home", group: "open", label: "open: Index", run: () => go("/") },
+      { id: "open-home", group: "open", label: "open: Home", run: () => go("/") },
       { id: "open-napi", group: "open", label: "open: #[napi]", run: () => go("/napi") },
       { id: "open-affine", group: "open", label: "open: AFFiNE", run: () => go("/affine") },
       { id: "open-perfsee", group: "open", label: "open: Perfsee", run: () => go("/perfsee") },

@@ -11,7 +11,16 @@ import { useEffect, useRef, useState } from "react";
  * first 60vh.
  */
 
-export function Hero({ start, onIntroDone }: { start: boolean; onIntroDone?: () => void }) {
+export function Hero({
+  start,
+  onIntroDone,
+  skipIntro = false,
+}: {
+  start: boolean;
+  onIntroDone?: () => void;
+  /** already played this SPA session — print final state, no type-in */
+  skipIntro?: boolean;
+}) {
   const reduced = useReducedMotion();
   const sectionRef = useRef<HTMLElement | null>(null);
 
@@ -28,9 +37,9 @@ export function Hero({ start, onIntroDone }: { start: boolean; onIntroDone?: () 
       {/* foreground — nudged right of the log column's left edge */}
       <motion.div
         className="relative z-10 mx-auto w-full max-w-[1360px] px-6 md:px-16 lg:pl-32"
-        style={reduced ? undefined : { y: lift }}
+        style={reduced || skipIntro ? undefined : { y: lift }}
       >
-        <TypeIntro start={start} reduced={reduced} onDone={onIntroDone} />
+        <TypeIntro start={start} reduced={reduced} skipIntro={skipIntro} onDone={onIntroDone} />
       </motion.div>
     </section>
   );
@@ -114,13 +123,17 @@ const REVEAL_HOLD = 1000;
 function TypeIntro({
   start,
   reduced,
+  skipIntro = false,
   onDone,
 }: {
   start: boolean;
   reduced: boolean;
+  skipIntro?: boolean;
   onDone?: () => void;
 }) {
-  const [typed, setTyped] = useState(reduced ? TOTAL_CHARS : 0);
+  // skip / reduced: full text immediately (no caret, no type-in)
+  const instant = reduced || skipIntro;
+  const [typed, setTyped] = useState(instant ? TOTAL_CHARS : 0);
   const doneRef = useRef(false);
 
   useEffect(() => {
@@ -129,7 +142,7 @@ function TypeIntro({
       onDone?.();
     }
     if (typed >= TOTAL_CHARS) return;
-    if (!start || reduced) return;
+    if (!start || instant) return;
     // hold the last line until the log reveal below has finished
     if (typed === REVEAL_AT) {
       const t = window.setTimeout(() => setTyped((c) => c + 1), REVEAL_HOLD);
@@ -152,7 +165,7 @@ function TypeIntro({
     }
     const t = window.setTimeout(() => setTyped((c) => c + 1), delay);
     return () => window.clearTimeout(t);
-  }, [typed, start, reduced, onDone]);
+  }, [typed, start, instant, onDone]);
 
   // walk the lines, slicing each at the global typed count
   let offset = 0;
@@ -167,7 +180,7 @@ function TypeIntro({
 
         // the caret sits exactly at the typing boundary — between the last
         // typed char and the invisible remainder — not at the line's full width
-        const showCaret = !reduced && (active || (isLast && typed >= TOTAL_CHARS));
+        const showCaret = !instant && (active || (isLast && typed >= TOTAL_CHARS));
         // zero-height outer box (width only) so the caret never grows the
         // line box — the painted bar is absolutely positioned from the baseline
         const caret = (

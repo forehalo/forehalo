@@ -98,12 +98,13 @@ export function PageBackdrop() {
   );
 }
 
-/* L-brackets at each corner — 1px steel, 18×18, inset so TopBar still owns the top */
+/* L-brackets at each corner — 1px steel, 18×18. Inset matches TopBar padding
+ * (`--forge-inset`) so brand/chrome align with the plate marks. */
 function RegistrationMarks() {
   const arm = 18;
   const thick = 1;
-  const inset = 20;
   const color = "var(--forge-mark)";
+  const inset = "var(--forge-inset)";
 
   const mark = (pos: CSSProperties, h: "left" | "right", v: "top" | "bottom") => (
     <span
@@ -126,8 +127,8 @@ function RegistrationMarks() {
 
   return (
     <>
-      {mark({ top: inset + 40 /* clear TopBar */, left: inset }, "left", "top")}
-      {mark({ top: inset + 40, right: inset }, "right", "top")}
+      {mark({ top: `calc(${inset} + 40px)` /* clear TopBar */, left: inset }, "left", "top")}
+      {mark({ top: `calc(${inset} + 40px)`, right: inset }, "right", "top")}
       {mark({ bottom: inset, left: inset }, "left", "bottom")}
       {mark({ bottom: inset, right: inset }, "right", "bottom")}
     </>

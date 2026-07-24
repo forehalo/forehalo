@@ -166,18 +166,24 @@
   border-radius: 3px;
 }
 
-@utility forge-liquid-glass {
-  /*
-    Scrolled TopBar material — macOS liquid glass stack:
-    ultra-translucent tint + blur/saturate/brightness refraction +
-    multi-layer inset light + depth shadow. No edge borders (inset ring
-    in the shadow stack carries the specular edge).
-  */
+/*
+  Scrolled TopBar — macOS liquid glass.
+  NOT an @utility: production LightningCSS was dropping the unprefixed
+  `backdrop-filter` and `var(--filter-list)` is unreliable across engines.
+  Filter functions are written literally (both prefixes) so the blur survives
+  minify + deploy. Tint/shadow still come from theme tokens.
+*/
+.forge-liquid-glass {
   background: var(--nav-glass-bg);
   border: none;
   box-shadow: var(--nav-glass-shadow);
-  backdrop-filter: var(--nav-glass-filter);
-  -webkit-backdrop-filter: var(--nav-glass-filter);
+  /* webkit first, standard last — keep both after minify */
+  -webkit-backdrop-filter: blur(8px) saturate(220%) brightness(1.05);
+  backdrop-filter: blur(8px) saturate(220%) brightness(1.05);
+}
+html.light .forge-liquid-glass {
+  -webkit-backdrop-filter: blur(8px) saturate(180%) brightness(1.03);
+  backdrop-filter: blur(8px) saturate(180%) brightness(1.03);
 }
 
 /* ── Dual-theme forge palette (design.md §2) ─────────────────────────── */
@@ -187,6 +193,8 @@
     --ease-compile-out: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-exit-in: cubic-bezier(0.7, 0, 0.2, 1);
     --topbar-h: 56px;
+    /* forge plate registration marks + TopBar outer padding (px) */
+    --forge-inset: 20px;
 
     /*
       Pre-class fallback = dark forge (brand-first). FOUC bootstrap and
@@ -219,10 +227,9 @@
     --forge-hatch: rgba(139, 144, 152, 0.55);
     --forge-hatch-opacity: 0.07;
     --forge-vignette: rgba(7, 8, 10, 0.55);
-    /* Liquid glass (scrolled TopBar) — macOS-style refraction stack */
+    /* Liquid glass (scrolled TopBar) — tint + shadow tokens; filter is literal on .forge-liquid-glass */
     --nav-glass-bg: rgba(255, 255, 255, 0.08);
     --nav-glass-border: rgba(255, 255, 255, 0.4);
-    --nav-glass-filter: blur(8px) saturate(220%) brightness(1.05);
     --nav-glass-btn-border: rgba(255, 255, 255, 0.35);
     --nav-glass-btn-bg: rgba(255, 255, 255, 0.1);
     --nav-glass-shadow:
@@ -262,7 +269,6 @@
     --forge-vignette: rgba(7, 8, 10, 0.55);
     --nav-glass-bg: rgba(255, 255, 255, 0.08);
     --nav-glass-border: rgba(255, 255, 255, 0.4);
-    --nav-glass-filter: blur(8px) saturate(220%) brightness(1.05);
     --nav-glass-btn-border: rgba(255, 255, 255, 0.35);
     --nav-glass-btn-bg: rgba(255, 255, 255, 0.1);
     --nav-glass-shadow:
@@ -304,7 +310,6 @@
     /* same glass recipe, slightly denser so it reads on warm paper */
     --nav-glass-bg: rgba(255, 255, 255, 0.45);
     --nav-glass-border: rgba(255, 255, 255, 0.65);
-    --nav-glass-filter: blur(8px) saturate(180%) brightness(1.03);
     --nav-glass-btn-border: rgba(20, 22, 26, 0.12);
     --nav-glass-btn-bg: rgba(255, 255, 255, 0.55);
     --nav-glass-shadow:

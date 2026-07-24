@@ -20,6 +20,7 @@ export function SectionHeader({
   compact = false,
   start = true,
   mono = false,
+  instant = false,
   className,
 }: {
   /** @deprecated leader numbers removed — ignored */
@@ -36,12 +37,15 @@ export function SectionHeader({
   start?: boolean;
   /** monospace title — for command-style headers (git log --graph …) */
   mono?: boolean;
+  /** skip word-rise (already revealed this session / reduced motion) */
+  instant?: boolean;
   className?: string;
 }) {
   const { ref, inView } = useInViewOnce<HTMLDivElement>(0.3);
   const reduced = useReducedMotion();
   const words = title.split(" ");
   const show = inView && start;
+  const staticTitle = reduced || instant;
 
   return (
     <div className={cn(compact ? "mb-5" : "mb-12", className)}>
@@ -55,7 +59,7 @@ export function SectionHeader({
             letterSpacing: "-0.02em",
           }}
         >
-          {reduced
+          {staticTitle
             ? title
             : words.map((w, i) => (
                 <span key={i} className="inline-block overflow-hidden pb-1 align-bottom">

@@ -73,7 +73,7 @@ const COMMITS: LogCommit[] = [
     message: "at(toeverything): tech leader · ship AFFiNE",
     tags: ["Rust", "TypeScript", "CRDT"],
     date: "2023 → 2025",
-    facts: [{ label: "70.6k★", href: "https://github.com/toeverything/AFFiNE" }],
+    facts: [{ label: "★70.6k", href: "https://github.com/toeverything/AFFiNE" }],
     diff: [
       "+ led the dev team",
       "+ built y-octo (Rust CRDT engine)",
@@ -88,10 +88,7 @@ const COMMITS: LogCommit[] = [
     message: "at(napi-rs): co-creator · implemented #[napi]",
     tags: ["Rust"],
     date: "2021 →",
-    facts: [
-      { label: "★7.8k", href: "https://github.com/napi-rs/napi-rs" },
-      { label: "napi-derive authors: LongYinan, Yii" },
-    ],
+    facts: [{ label: "★7.8k", href: "https://github.com/napi-rs/napi-rs" }],
     diff: ["+ introduce #[napi] macro for Rust → Node.js FFI"],
     linkChip: { to: "/napi" },
   },
@@ -104,7 +101,7 @@ const COMMITS: LogCommit[] = [
     date: "2020 → 2023",
     facts: [
       { label: "★744", href: "https://github.com/perfsee/perfsee" },
-      { label: "inspires rsdoctor" },
+      { label: "inspires rsdoctor", href: "https://github.com/web-infra-dev/rsdoctor" },
     ],
     diff: [
       "+ lead dev team",
@@ -138,11 +135,11 @@ const COMMITS: LogCommit[] = [
     sha: "3f9e0b1",
     lane: "main",
     root: true,
-    message: "chore: initial commit — soochow university, software engineering",
+    message: "at(Soochow University): initial commit",
     tags: [],
     date: "→ 2017",
-    facts: [{ label: "suda.edu.cn ↗", href: "https://www.suda.edu.cn" }],
-    diff: ["+ software engineering, soochow university"],
+    facts: [],
+    diff: ["+ software engineering"],
   },
 ];
 
@@ -156,9 +153,17 @@ const BRANCH_X = "left-[36px]";
 const FINE_POINTER =
   typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-export function LogSection({ start = true }: { start?: boolean }) {
+export function LogSection({
+  start = true,
+  skipReveal = false,
+}: {
+  start?: boolean;
+  /** home intro already played this session — no stagger enter */
+  skipReveal?: boolean;
+}) {
   const { ref, inView } = useInViewOnce<HTMLDivElement>(0.15);
   const [open, setOpen] = useState<number | null>(null);
+  const show = skipReveal || (inView && start);
 
   return (
     <section
@@ -171,15 +176,19 @@ export function LogSection({ start = true }: { start?: boolean }) {
         compact
         mono
         start={start}
+        instant={skipReveal}
       />
 
       <motion.div
         ref={ref}
-        initial="hidden"
-        animate={inView && start ? "show" : "hidden"}
+        initial={skipReveal ? false : "hidden"}
+        animate={show ? "show" : "hidden"}
         variants={{
           hidden: { opacity: 0 },
-          show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+          show: {
+            opacity: 1,
+            transition: { staggerChildren: skipReveal ? 0 : 0.06 },
+          },
         }}
         className="overflow-hidden rounded-[3px] border border-steel bg-carbon"
       >
@@ -196,7 +205,9 @@ export function LogSection({ start = true }: { start?: boolean }) {
                 show: {
                   opacity: 1,
                   y: 0,
-                  transition: { duration: 0.45, ease: EASE_COMPILE_OUT },
+                  transition: skipReveal
+                    ? { duration: 0 }
+                    : { duration: 0.45, ease: EASE_COMPILE_OUT },
                 },
               }}
               onClick={() => setOpen((cur) => (cur === i ? null : i))}
