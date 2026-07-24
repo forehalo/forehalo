@@ -292,17 +292,18 @@ function QrHeader() {
         to={INNER_HOME_PATH}
         data-cursor="link"
         aria-label={`${SCAN_LABEL} — enter site`}
-        className="group relative mx-auto flex size-[9.5rem] items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] sm:size-[11rem]"
+        className="group relative mx-auto flex size-[11rem] items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] sm:size-[12.5rem]"
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
         onFocus={() => setHovering(true)}
         onBlur={() => setHovering(false)}
       >
         <QrSvg matrix={matrix} className="size-full" />
-        {/* circular cutout + ASCII-art raster of /avatars/yii.jpg (see scripts/gen-avatar-ascii-image.mjs) */}
+        {/* Center logo — keep ≤~30% of area so ECC-H can still recover.
+            36% diameter ≈ 10% area; cutout lives inside the QR quiet pad. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 flex size-[52%] -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-[#f4f1ea] ring-1 ring-[#1a1814]/12"
+          className="pointer-events-none absolute left-1/2 top-1/2 flex size-[36%] -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-[#f4f1ea] ring-1 ring-black/15"
         >
           <img
             src="/avatars/yii-ascii.png"
@@ -333,21 +334,17 @@ function QrSvg({
   matrix: ReturnType<typeof encodeQrMatrix>;
   className?: string;
 }) {
-  const margin = 1;
+  // Quiet zone: light modules must stay clear of dark ink. Spec wants 4;
+  // 3 is enough on light receipt stock (paper continues around the SVG).
+  // No filled SVG plate — paper shows through so the code sits on the receipt.
+  const margin = 3;
   const dim = matrix.size + margin * 2;
   const cells: ReactNode[] = [];
   for (let r = 0; r < matrix.size; r++) {
     for (let c = 0; c < matrix.size; c++) {
       if (!matrix.get(r, c)) continue;
       cells.push(
-        <rect
-          key={`${r}-${c}`}
-          x={c + margin}
-          y={r + margin}
-          width={1}
-          height={1}
-          fill="#1a1814"
-        />,
+        <rect key={`${r}-${c}`} x={c + margin} y={r + margin} width={1} height={1} fill="#000" />,
       );
     }
   }
@@ -358,7 +355,6 @@ function QrSvg({
       shapeRendering="crispEdges"
       aria-hidden
     >
-      <rect width={dim} height={dim} fill="#f4f1ea" />
       {cells}
     </svg>
   );

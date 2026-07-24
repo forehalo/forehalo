@@ -55,9 +55,11 @@
   mix-blend-mode: multiply;
 }
 
+/* No z-index here — a stacking context would trap the QR under paper
+   wear layers (::before/::after/speckles). Body text stays at auto (under
+   wear); .receipt-qr lifts itself above for a clean scan target. */
 .receipt-ink {
   position: relative;
-  z-index: 1;
 }
 
 /* sparse white flecks (thermal dust / unprinted pinholes) */
@@ -147,15 +149,13 @@ span.receipt-line--mid-skip {
   transform-origin: bottom center;
 }
 
-/* QR region — no filter/transform here (they create a fixed containing
-   block and break the cursor-adjacent "click to scan" label). */
+/* QR region — lifted above thermal wear (streaks/noise/flecks at z 2–4)
+   so cameras see an uncorrupted matrix. No solid pad / filter / transform
+   (pad looked like a foreign block on the receipt; filter creates a fixed
+   containing block and breaks the cursor-adjacent "click to scan" label). */
 .receipt-qr {
   position: relative;
-  z-index: 1;
-}
-
-.receipt-qr svg {
-  filter: contrast(1.05);
+  z-index: 5;
 }
 
 /* Raster ASCII art of the X avatar (public/avatars/yii-ascii.png) */

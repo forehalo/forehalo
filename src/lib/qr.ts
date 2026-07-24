@@ -32,7 +32,7 @@ export function encodeQrSvg(
   opts: { moduleSize?: number; marginModules?: number } = {},
 ): string {
   const moduleSize = opts.moduleSize ?? 4;
-  const marginModules = opts.marginModules ?? 1;
+  const marginModules = opts.marginModules ?? 3;
   const matrix = encodeQrMatrix(payload);
   const dim = (matrix.size + marginModules * 2) * moduleSize;
   const rects: string[] = [];
