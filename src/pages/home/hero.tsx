@@ -131,9 +131,12 @@ function TypeIntro({
   skipIntro?: boolean;
   onDone?: () => void;
 }) {
-  // skip / reduced: full text immediately (no caret, no type-in)
+  // skip / reduced: full text immediately (no caret, no type-in).
+  // Latch at mount — if skipIntro/reduced flips true mid-type (e.g. parent
+  // re-reads localStorage after onDone), do not abort the remaining lines.
   const instant = reduced || skipIntro;
   const [typed, setTyped] = useState(instant ? TOTAL_CHARS : 0);
+  const animateRef = useRef(!instant);
   const doneRef = useRef(false);
 
   useEffect(() => {
@@ -142,7 +145,7 @@ function TypeIntro({
       onDone?.();
     }
     if (typed >= TOTAL_CHARS) return;
-    if (!start || instant) return;
+    if (!start || !animateRef.current) return;
     // hold the last line until the log reveal below has finished
     if (typed === REVEAL_AT) {
       const t = window.setTimeout(() => setTyped((c) => c + 1), REVEAL_HOLD);
@@ -165,7 +168,7 @@ function TypeIntro({
     }
     const t = window.setTimeout(() => setTyped((c) => c + 1), delay);
     return () => window.clearTimeout(t);
-  }, [typed, start, instant, onDone]);
+  }, [typed, start, onDone]);
 
   // walk the lines, slicing each at the global typed count
   let offset = 0;
@@ -180,7 +183,7 @@ function TypeIntro({
 
         // the caret sits exactly at the typing boundary — between the last
         // typed char and the invisible remainder — not at the line's full width
-        const showCaret = !instant && (active || (isLast && typed >= TOTAL_CHARS));
+        const showCaret = animateRef.current && (active || (isLast && typed >= TOTAL_CHARS));
         // zero-height outer box (width only) so the caret never grows the
         // line box — the painted bar is absolutely positioned from the baseline
         const caret = (

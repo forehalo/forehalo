@@ -12,10 +12,16 @@ import { hasHomeIntroPlayed, markHomeIntroPlayed } from "@/pages/home/intro-sess
  *
  * Intro animation runs once per browser (localStorage `fh-home-intro-played`);
  * remounts and reloads skip the type-in after the first play.
+ *
+ * `skipIntro` is fixed at mount. The hero marks localStorage as soon as the
+ * log may reveal (before the final verse line finishes typing); re-reading
+ * storage on every render would flip skipIntro mid-animation and freeze the
+ * typewriter on the last line.
  */
 
 export default function Home() {
-  const skipIntro = hasHomeIntroPlayed();
+  // once per mount — do not re-read after markHomeIntroPlayed()
+  const [skipIntro] = useState(() => hasHomeIntroPlayed());
   // the log's reveal waits for the hero's typing intro to finish
   const [introDone, setIntroDone] = useState(skipIntro);
 
