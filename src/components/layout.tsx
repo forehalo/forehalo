@@ -27,8 +27,8 @@ import { INNER_HOME_PATH } from "@/lib/routes";
  * heroes opt out inside the page with a negative top margin (-mt-14).
  *
  * Includes: Navbar (TopBar), Footer, link/button hover frame, static forge-plate
- * backdrop, grain overlay, command palette, Lenis smooth scroll, and the
- * "recompile wipe" page transition.
+ * backdrop, grain overlay, command palette, Lenis smooth scroll (off on `/`),
+ * and the "recompile wipe" page transition.
  */
 export function Layout() {
   const { pathname } = useLocation();
@@ -39,7 +39,8 @@ export function Layout() {
   return (
     <MotionProvider>
       <ToastProvider>
-        <SmoothScrollProvider>
+        {/* Receipt gate scrolls natively — no Lenis instance on `/`. */}
+        <SmoothScrollProvider enabled={!landing}>
           <CommandPaletteProvider>
             <a
               href="#main"

@@ -11,15 +11,26 @@ import { useReducedMotion } from "./use-reduced-motion";
  *
  * Lenis drives the native scroll position (not a transform layer), so CSS
  * sticky and framer-motion useScroll keep working without GSAP ScrollTrigger.
+ *
+ * Pass `enabled={false}` to skip construction entirely (receipt gate `/` uses
+ * native scroll only). Do not use `lenis.stop()` for that — stop still
+ * preventDefaults wheel and freezes nested / native scrollers.
  */
 const LenisCtx = createContext<Lenis | null>(null);
 
-export function SmoothScrollProvider({ children }: { children: ReactNode }) {
+export function SmoothScrollProvider({
+  children,
+  enabled = true,
+}: {
+  children: ReactNode;
+  /** When false, Lenis is never constructed (context stays null). */
+  enabled?: boolean;
+}) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
   const reduced = useReducedMotion();
 
   useEffect(() => {
-    if (reduced) return; // native scrolling under reduced motion
+    if (reduced || !enabled) return; // native scrolling under reduced motion / off routes
     const instance = new Lenis({ lerp: 0.1, wheelMultiplier: 1.0, syncTouch: false });
     setLenis(instance);
     let raf = 0;
@@ -33,7 +44,7 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       instance.destroy();
       setLenis(null);
     };
-  }, [reduced]);
+  }, [reduced, enabled]);
 
   return createElement(LenisCtx.Provider, { value: lenis }, children);
 }

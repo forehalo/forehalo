@@ -98,6 +98,25 @@ span.receipt-line--mid-skip {
   width: auto;
 }
 
+/* **** separator — always edge-to-edge of the ink column.
+   space-between distributes * glyphs; wins over mid-skip's display:block. */
+.receipt-dotted-rule,
+.receipt-dotted-rule.receipt-line--mid-skip {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  justify-content: space-between;
+  align-items: baseline;
+  overflow: hidden;
+  white-space: nowrap;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.receipt-dotted-rule > .receipt-glyph {
+  flex: 0 0 auto;
+}
+
 .receipt-line--mid-skip::after {
   content: "";
   position: absolute;

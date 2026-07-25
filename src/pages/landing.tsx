@@ -21,7 +21,8 @@ import { Link } from "react-router";
 
 /**
  * Receipt gate — `/`.
- * Full-viewport black void + centered white thermal strip. The reference
+ * Full-viewport black void + centered white thermal strip. Document flow +
+ * native scroll only (Layout disables Lenis on this route). The reference
  * barcode is a live QR for `https://thatyii.dev`; click / keyboard enters
  * the compiled-identity home at INNER_HOME_PATH.
  *
@@ -38,10 +39,11 @@ export default function Landing() {
   const wear = useMemo(() => recordLandingVisit(), []);
   const wearT = wear / LANDING_VISIT_MAX;
 
+  // Native document scroll (Lenis is not constructed on `/` — see Layout).
   return (
     <WearCtx.Provider value={wear}>
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-black">
-        <div className="flex min-h-full items-start justify-center px-3 py-6 sm:items-center sm:py-10">
+      <div className="min-h-dvh bg-black">
+        <div className="flex min-h-dvh items-start justify-center px-3 py-6 sm:items-center sm:py-10">
           <article
             className="receipt-paper relative w-full max-w-[20rem] shrink-0 px-5 pb-7 pt-5 sm:max-w-[22rem] sm:px-6"
             aria-label="entry receipt"
@@ -362,12 +364,13 @@ function QrSvg({
 
 /* ── body blocks ────────────────────────────────────────────────────── */
 
+/** Full-width receipt separator — glyphs flex across the paper content box. */
 function DottedRule() {
   return (
     <ThermalPrint
-      text={"*".repeat(34)}
+      text={"*".repeat(36)}
       as="div"
-      className="my-3 overflow-hidden font-mono text-[9px] leading-none tracking-[0.32em] text-black"
+      className="receipt-dotted-rule my-3 font-mono text-[9px] leading-none text-black"
     />
   );
 }
