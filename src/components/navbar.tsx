@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons";
+import { Layers } from "lucide-react";
 import { useCommandPalette } from "@/components/command-palette";
-import { INNER_HOME_PATH } from "@/lib/routes";
+import { INNER_HOME_PATH, PROJECTS_PATH } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 /**
@@ -17,7 +18,8 @@ import { cn } from "@/lib/utils";
  * blur + saturate + brightness refraction, multi-layer inset light. Tokens in
  * `src/index.css` (`--nav-glass-*`) flip with light/dark.
  *
- * Page routes live in the command palette / footer — not as TopBar links.
+ * Page routes live in the command palette / footer — the single exception is
+ * the projects index, which earns a TopBar button (Layers = collection).
  * Horizontal padding is fixed `--forge-inset` so brand / chrome align with the
  * forge plate registration marks (corner L-brackets).
  */
@@ -70,15 +72,28 @@ function TopBar() {
           </span>
         )}
 
-        {/* right: socials · palette hint */}
+        {/* right: projects · socials · palette hint */}
         <div className="flex shrink-0 items-center gap-3">
+          {/* collection icon → the projects card index */}
+          <Link
+            to={PROJECTS_PATH}
+            data-cursor="link"
+            aria-label="projects"
+            title="projects"
+            className={cn(
+              "inline-flex p-1.5 transition-colors hover:text-halo",
+              pathname === PROJECTS_PATH ? "text-halo" : "text-ash",
+            )}
+          >
+            <Layers size={16} />
+          </Link>
           <a
             href="https://github.com/forehalo"
             target="_blank"
             rel="noreferrer"
             aria-label="GitHub @forehalo"
             data-cursor="link"
-            className="-m-1.5 inline-flex p-1.5 text-ash transition-colors hover:text-halo"
+            className="inline-flex p-1.5 text-ash transition-colors hover:text-halo"
           >
             <SiGithub size={16} color="currentColor" />
           </a>
@@ -88,7 +103,7 @@ function TopBar() {
             rel="noreferrer"
             aria-label="X @forehalo"
             data-cursor="link"
-            className="-m-1.5 inline-flex p-1.5 text-ash transition-colors hover:text-halo"
+            className="inline-flex p-1.5 text-ash transition-colors hover:text-halo"
           >
             <SiX size={16} color="currentColor" />
           </a>

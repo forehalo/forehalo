@@ -264,4 +264,11 @@ Per-section title (`display-lg`, or `display-md` + `font-mono` for compact/comma
 | `avatar-glyph.svg` | SVG   | Brand mark: abstract 64×64 pixel-grid "compiled glyph" (not a portrait). Crisp pixels, no gradients. | Favicon, og:image, brand |
 | `grain.png`        | Image | Tileable fine monochrome film-grain texture, used at 2–3% opacity as a fixed overlay.                | Global overlay           |
 | `rust.png`         | Image | Ferris the crab (Rust mascot), used on the `#[napi]` hero frame.                                     | `/napi` hero             |
-| `napi-favicon.png` | Image | napi.rs site favicon (transparent), used on the napi.rs link under the attribute.                    | `/napi` hero             |
+
+Project logos live under `public/projects/`:
+
+| Filename                       | Type  | Description                                                                                                    | Location                  |
+| ------------------------------ | ----- | -------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `napi-favicon.png`             | Image | napi.rs site favicon (transparent), used on the napi.rs link under the attribute and as the napi-rs card logo. | `/napi` hero, `/projects` |
+| `perfsee-logo.svg`             | SVG   | Official Perfsee mark (blue app-icon, from `bytedance/perfsee` `assets/logo.svg`).                             | `/projects`               |
+| `avatar-glyph-transparent.svg` | SVG   | The compiled pixel glyph without the carbon plate — the thatyii.dev card logo.                                 | `/projects`               |

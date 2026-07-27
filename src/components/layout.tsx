@@ -54,14 +54,21 @@ export function Layout() {
             {!landing && <Navbar />}
             {!landing && <RecompileWipe />}
 
-            <main id="main" className={landing ? "relative z-10" : "relative z-10 pt-14"}>
-              <Outlet />
-            </main>
-            {!hideFooter && (
-              <div className="relative z-10">
-                <Footer />
-              </div>
-            )}
+            {/* sticky-footer shell: main stretches so the footer stays at the
+                viewport bottom even when the page content is short */}
+            <div className="flex min-h-dvh flex-col">
+              <main
+                id="main"
+                className={landing ? "relative z-10 flex-1" : "relative z-10 flex-1 pt-14"}
+              >
+                <Outlet />
+              </main>
+              {!hideFooter && (
+                <div className="relative z-10">
+                  <Footer />
+                </div>
+              )}
+            </div>
 
             {/* film grain: opacity + blend from forge theme vars — skipped on receipt */}
             {!landing && (
@@ -93,6 +100,7 @@ export function Layout() {
 const PAGE_LOG: Record<string, { crate: string; version?: string }> = {
   "/": { crate: "receipt" },
   [INNER_HOME_PATH]: { crate: "index" },
+  "/projects": { crate: "projects" },
   "/napi": { crate: "napi", version: "2.16.13" },
   "/affine": { crate: "AFFiNE", version: "0.25.0" },
   "/perfsee": { crate: "perfsee", version: "1.9.0" },

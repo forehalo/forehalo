@@ -15,6 +15,7 @@ import TerminalLayout from "@/pages/terminal/terminal-layout";
  * Project crates + `/home` stay lazy route chunks (design.md §10).
  */
 const Home = lazy(() => import("@/pages/home"));
+const Projects = lazy(() => import("@/pages/projects"));
 const Napi = lazy(() => import("@/pages/napi"));
 const Affine = lazy(() => import("@/pages/affine"));
 const Perfsee = lazy(() => import("@/pages/perfsee"));
@@ -49,6 +50,14 @@ export default function App() {
           element={
             <Lazy>
               <Home />
+            </Lazy>
+          }
+        />
+        <Route
+          path="projects"
+          element={
+            <Lazy>
+              <Projects />
             </Lazy>
           }
         />

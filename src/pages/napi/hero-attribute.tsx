@@ -78,7 +78,7 @@ export function HeroAttribute() {
           {
             label: "napi.rs",
             href: "https://napi.rs",
-            icon: <img src="/napi-favicon.png" alt="" className="size-3 rounded-[1px]" />,
+            icon: <img src="/projects/napi-favicon.png" alt="" className="size-3 rounded-[1px]" />,
           },
           {
             label: "napi-rs/napi-rs",

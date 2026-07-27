@@ -7,6 +7,9 @@
 /** Existing compiled-identity home (hero + career log) — entered via QR scan. */
 export const INNER_HOME_PATH = "/home" as const;
 
+/** Projects index — card grid linking out to project crates / GitHub. */
+export const PROJECTS_PATH = "/projects" as const;
+
 /** macOS-terminal fork of the site (terminal.md) — home of the REPL. */
 export const TERMINAL_HOME_PATH = "/terminal" as const;
 
