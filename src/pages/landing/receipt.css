@@ -182,37 +182,3 @@ span.receipt-line--mid-skip {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
-
-/*
-  "click to scan" — same thermal mono ink as the receipt body, not a dark chip.
-  Cursor-follow instance is portaled to body; static fallback sits under the QR.
-*/
-.receipt-scan-hint {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #1a1814;
-  background: #f4f1ea;
-  border: 1px solid color-mix(in srgb, #1a1814 28%, transparent);
-  border-radius: 1px;
-  padding: 3px 7px;
-  line-height: 1.2;
-  white-space: nowrap;
-  box-shadow: none;
-}
-
-.receipt-scan-hint--static {
-  display: block;
-  width: fit-content;
-  margin-inline: auto;
-  color: color-mix(in srgb, #1a1814 55%, #f4f1ea);
-  border-color: color-mix(in srgb, #1a1814 16%, transparent);
-  text-align: center;
-}
-
-.receipt-scan-hint--static.is-hot {
-  color: #1a1814;
-  border-color: color-mix(in srgb, #1a1814 28%, transparent);
-}

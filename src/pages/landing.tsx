@@ -1,36 +1,23 @@
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { encodeQrMatrix, SITE_QR_PAYLOAD } from "@/lib/qr";
-import { INNER_HOME_PATH } from "@/lib/routes";
+import { INNER_HOME_PATH, TERMINAL_HOME_PATH } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { COMMITS, logInvoiceAmount, parseLogMessage, type LogCommit } from "@/pages/home/log-data";
 import { LANDING_VISIT_MAX, recordLandingVisit } from "@/pages/landing/visit-count";
 import "@/pages/landing/receipt.css";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type CSSProperties,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
-import { createPortal } from "react-dom";
+import { createContext, useContext, useMemo, type CSSProperties, type ReactNode } from "react";
 import { Link } from "react-router";
 
 /**
  * Receipt gate — `/`.
  * Full-viewport black void + centered white thermal strip. Document flow +
  * native scroll only (Layout disables Lenis on this route). The reference
- * barcode is a live QR for `https://thatyii.dev`; click / keyboard enters
- * the compiled-identity home at INNER_HOME_PATH.
+ * barcode is a live QR for `https://thatyii.dev` (phone-scannable only — it
+ * is NOT clickable). Entry happens via the two buttons under the title:
+ * "Entry for Human" → INNER_HOME_PATH, "Entry for Bot" → TERMINAL_HOME_PATH.
  *
  * Visit count (`fh-landing-visits`, 0–10) only scales thermal fade/missing
  * intensity — paper color stays fixed. See ThermalPrint + visit-count.ts.
  */
-
-const SCAN_LABEL = "click to scan";
 
 /** Wear level for this paint (0 fresh → 10 heavily faded thermal). */
 const WearCtx = createContext(0);
@@ -227,79 +214,13 @@ function ThermalPrint({
 /* ── QR header (replaces barcode + circular cutout) ─────────────────── */
 
 function QrHeader() {
-  const reduced = useReducedMotion();
-  const [coarse, setCoarse] = useState(false);
-  const [hovering, setHovering] = useState(false);
-  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(pointer: coarse)");
-    const sync = () => setCoarse(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  // Track pointer while hovering — document-level so we keep clientX/Y even
-  // if child layers intercept move events inside the QR cutout.
-  useEffect(() => {
-    if (!hovering || reduced || coarse) return;
-    const onMove = (e: globalThis.MouseEvent) => {
-      setCursor({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, [hovering, reduced, coarse]);
-
   const matrix = useMemo(() => encodeQrMatrix(SITE_QR_PAYLOAD, "H"), []);
-  const followCursor = hovering && !reduced && !coarse && cursor !== null;
 
-  // static fallback when cursor-follow is inappropriate
-  const showStaticLabel = coarse || reduced;
-
-  const onEnter = useCallback((e: MouseEvent) => {
-    setHovering(true);
-    setCursor({ x: e.clientX, y: e.clientY });
-  }, []);
-
-  const onLeave = useCallback(() => {
-    setHovering(false);
-    setCursor(null);
-  }, []);
-
-  // Portal to body: ancestors use filter/z-index and turn `fixed` into a
-  // local containing block, which pulled the label off the real cursor.
-  // Style matches thermal receipt ink/paper (not a dark UI chip).
-  const cursorLabel =
-    followCursor &&
-    createPortal(
-      <span
-        aria-hidden
-        className="receipt-scan-hint pointer-events-none fixed z-10050"
-        style={
-          {
-            left: cursor.x + 14,
-            top: cursor.y + 14,
-          } satisfies CSSProperties
-        }
-      >
-        {SCAN_LABEL}
-      </span>,
-      document.body,
-    );
-
+  // The QR is phone-scannable decoration, not a link — entry is via the
+  // buttons under the title. `mb-1` keeps the title line 4px below the code.
   return (
-    <div className="receipt-qr relative mb-4">
-      <Link
-        to={INNER_HOME_PATH}
-        data-cursor="link"
-        aria-label={`${SCAN_LABEL} — enter site`}
-        className="group relative mx-auto flex size-[11rem] items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] sm:size-[12.5rem]"
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
-        onFocus={() => setHovering(true)}
-        onBlur={() => setHovering(false)}
-      >
+    <div className="receipt-qr relative mb-1">
+      <div className="relative mx-auto flex size-[11rem] items-center justify-center sm:size-[12.5rem]">
         <QrSvg matrix={matrix} className="size-full" />
         {/* Center logo — keep ≤~30% of area so ECC-H can still recover.
             36% diameter ≈ 10% area; cutout lives inside the QR quiet pad. */}
@@ -316,15 +237,7 @@ function QrHeader() {
             className="receipt-avatar-ascii size-full scale-110 object-cover object-center select-none"
           />
         </span>
-      </Link>
-
-      {cursorLabel}
-
-      {showStaticLabel && (
-        <p className={cn("receipt-scan-hint receipt-scan-hint--static mt-2", hovering && "is-hot")}>
-          {SCAN_LABEL}
-        </p>
-      )}
+      </div>
     </div>
   );
 }
@@ -390,6 +303,7 @@ function ReceiptBody() {
     <div className="font-mono text-[10px] uppercase leading-[1.55] tracking-[0.08em] text-black sm:text-[11px]">
       <div className="text-center">
         <ThermalPrint text="Yii // thatyii.dev" as="div" />
+        <EntryLinks />
         <ThermalPrint
           text={`${now}  terminal 01`}
           as="div"
@@ -416,6 +330,31 @@ function ReceiptBody() {
 
       <ThermalPrint text="thank you, kindly" as="div" className="text-center tracking-[0.14em]" />
     </div>
+  );
+}
+
+/**
+ * The two gates, receipt-styled: side-by-side thermal-bordered buttons.
+ * Human → the compiled-identity home; Bot → the /terminal fork.
+ */
+function EntryLinks() {
+  return (
+    <div className="mt-1.5 flex gap-2">
+      <EntryLink to={INNER_HOME_PATH} label="Entry for Human" />
+      <EntryLink to={TERMINAL_HOME_PATH} label="Entry for Bot" />
+    </div>
+  );
+}
+
+function EntryLink({ to, label }: { to: string; label: string }) {
+  return (
+    <Link
+      to={to}
+      data-cursor="link"
+      className="flex-1 border border-black/80 px-2 py-1.5 text-[9px] uppercase tracking-[0.14em] text-black outline-none transition-colors hover:bg-black hover:text-[#f4f1ea] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea]"
+    >
+      <ThermalPrint text={label} as="span" />
+    </Link>
   );
 }
 
