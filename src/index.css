@@ -351,8 +351,9 @@ html.light .forge-liquid-glass {
     color: var(--bone);
   }
 
-  /* Focus looks like the forge halo ring (design.md §9) */
-  :focus-visible {
+  /* Focus looks like the forge halo ring (design.md §9). The /terminal REPL
+     input opts out via [data-term-input] — a shell prompt keeps no chrome. */
+  :focus-visible:not([data-term-input]) {
     outline: 2px solid var(--halo);
     outline-offset: 2px;
     box-shadow: 0 0 0 4px var(--halo-soft);

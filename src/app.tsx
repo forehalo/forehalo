@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router";
 import { Layout } from "@/components/layout";
 import { StubPage } from "@/pages/stub";
 import Landing from "@/pages/landing";
+import TerminalLayout from "@/pages/terminal/terminal-layout";
 
 /**
  * ROUTING CONTRACT (react-dev.md "pattern B — nested routes"):
@@ -17,6 +18,11 @@ const Home = lazy(() => import("@/pages/home"));
 const Napi = lazy(() => import("@/pages/napi"));
 const Affine = lazy(() => import("@/pages/affine"));
 const Perfsee = lazy(() => import("@/pages/perfsee"));
+// /terminal fork pages (terminal.md) — TerminalLayout itself stays eager
+const TerminalHome = lazy(() => import("@/pages/terminal"));
+const TerminalNapi = lazy(() => import("@/pages/terminal/projects/napi"));
+const TerminalAffine = lazy(() => import("@/pages/terminal/projects/affine"));
+const TerminalPerfsee = lazy(() => import("@/pages/terminal/projects/perfsee"));
 
 function PageLoader() {
   return (
@@ -74,6 +80,45 @@ export default function App() {
         />
         <Route path="*" element={<StubPage file="404.rs" title="not found" />} />
       </Route>
+
+      {/* /terminal fork (terminal.md): own macOS-window chrome via
+          TerminalLayout (pattern B — nested routes, renders <Outlet/>);
+          deliberately NOT the site Layout (no TopBar/Footer/palette/Lenis). */}
+      <Route path="terminal" element={<TerminalLayout />}>
+        <Route
+          index
+          element={
+            <Lazy>
+              <TerminalHome />
+            </Lazy>
+          }
+        />
+        <Route
+          path="napi"
+          element={
+            <Lazy>
+              <TerminalNapi />
+            </Lazy>
+          }
+        />
+        <Route
+          path="affine"
+          element={
+            <Lazy>
+              <TerminalAffine />
+            </Lazy>
+          }
+        />
+        <Route
+          path="perfsee"
+          element={
+            <Lazy>
+              <TerminalPerfsee />
+            </Lazy>
+          }
+        />
+      </Route>
+      <Route path="tui" element={<Navigate to="/terminal" replace />} />
     </Routes>
   );
 }

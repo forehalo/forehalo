@@ -7,5 +7,8 @@
 /** Existing compiled-identity home (hero + career log) — entered via QR scan. */
 export const INNER_HOME_PATH = "/home" as const;
 
+/** macOS-terminal fork of the site (terminal.md) — home of the REPL. */
+export const TERMINAL_HOME_PATH = "/terminal" as const;
+
 /** Public domain encoded into the landing QR. */
 export const SITE_QR_PAYLOAD = "https://thatyii.dev" as const;
