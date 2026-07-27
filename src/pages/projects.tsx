@@ -4,14 +4,15 @@ import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/section-header";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
-import { PROJECT_CARDS, type ProjectCard, type ProjectLogo } from "@/pages/projects/data";
+import { PROJECTS, type Project, type ProjectLogo } from "@/lib/projects";
 
 /**
  * PROJECTS — `/projects` (projects.md §index). A card index of the projects,
  * up to three columns: logo centered on the left, name top-right, one-line
  * tagline bottom-right. Cards prefer the on-site intro page; projects
- * without one (thatyii.dev) link straight to GitHub. Reached from the
- * TopBar's Layers (collection) button.
+ * without one link straight to GitHub. Data comes from the shared registry
+ * in @/lib/projects — nothing project-specific lives in this file.
+ * Reached from the TopBar's Layers (collection) button.
  */
 
 const META_TITLE = "projects · Yii";
@@ -40,7 +41,7 @@ export default function Projects() {
         badge={<span className="micro text-dim">$ ls ~/projects</span>}
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {PROJECT_CARDS.map((card, i) => (
+        {PROJECTS.map((card, i) => (
           <ProjectCardView key={card.name} card={card} index={i} />
         ))}
       </div>
@@ -48,7 +49,7 @@ export default function Projects() {
   );
 }
 
-function ProjectCardView({ card, index }: { card: ProjectCard; index: number }) {
+function ProjectCardView({ card, index }: { card: Project; index: number }) {
   const reduced = useReducedMotion();
 
   const body = (
@@ -56,7 +57,7 @@ function ProjectCardView({ card, index }: { card: ProjectCard; index: number }) 
       {/* bare logo at the old plate's size — no background, centered
           against the two-line text block */}
       <span className="grid size-11 shrink-0 place-items-center self-center">
-        <Logo logo={card.logo} />
+        <Logo logo={card.logo} name={card.name} />
       </span>
       <span className="min-w-0">
         <span className="block text-[13px] font-medium text-bone transition-colors group-hover:text-halo">
@@ -91,10 +92,10 @@ function ProjectCardView({ card, index }: { card: ProjectCard; index: number }) 
   );
 }
 
-function Logo({ logo }: { logo: ProjectLogo }) {
+function Logo({ logo, name }: { logo: ProjectLogo; name: string }) {
   switch (logo.kind) {
     case "img":
-      return <img src={logo.src} alt={logo.alt} className="size-full object-contain" />;
+      return <img src={logo.src} alt={name} className="size-full object-contain" />;
     case "simple":
       return <logo.Icon size={40} color="currentColor" className="text-ash" />;
   }

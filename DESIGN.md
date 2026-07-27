@@ -271,4 +271,5 @@ Project logos live under `public/projects/`:
 | ------------------------------ | ----- | -------------------------------------------------------------------------------------------------------------- | ------------------------- |
 | `napi-favicon.png`             | Image | napi.rs site favicon (transparent), used on the napi.rs link under the attribute and as the napi-rs card logo. | `/napi` hero, `/projects` |
 | `perfsee-logo.svg`             | SVG   | Official Perfsee mark (blue app-icon, from `bytedance/perfsee` `assets/logo.svg`).                             | `/projects`               |
+| `thatreceipt.svg`              | SVG   | That Receipt site mark (🧾 emoji as SVG text, from `yii-labs/thatreceipt` `public/favicon.svg`).               | `/projects`               |
 | `avatar-glyph-transparent.svg` | SVG   | The compiled pixel glyph without the carbon plate — the thatyii.dev card logo.                                 | `/projects`               |

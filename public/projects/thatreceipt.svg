@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!--
+    Receipt emoji as the site mark. Drawn as text so it picks up whatever emoji
+    font the platform ships, which keeps this a ~300 byte asset instead of a
+    traced glyph. The tab favicon and the panel wordmark share it.
+  -->
+  <text x="32" y="34" font-size="54" text-anchor="middle" dominant-baseline="central">🧾</text>
+</svg>

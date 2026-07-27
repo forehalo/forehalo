@@ -1,14 +1,12 @@
 /**
- * Project registry for the terminal fork (terminal.md §data) — every fact is
- * real and consistent with @/pages/home/log-data (star counts, roles, dates).
- * `route` points at the project's /terminal fork page; thatyii.dev has none
- * because it IS the current site.
+ * Terminal view of the shared project registry (terminal.md §data) — DERIVED
+ * from @/lib/projects, the single source of truth. Never edit entries here;
+ * add projects to the registry and both surfaces update. `route` is the
+ * /terminal fork of the project's on-site page (absent when it has none).
  */
+import { PROJECTS as REGISTRY, type ProjectFact } from "@/lib/projects";
 
-export interface ProjectFact {
-  label: string;
-  href?: string;
-}
+export type { ProjectFact };
 
 export interface ProjectEntry {
   name: string;
@@ -19,55 +17,13 @@ export interface ProjectEntry {
   route?: string;
 }
 
-export const PROJECTS: ProjectEntry[] = [
-  {
-    name: "thatyii.dev",
-    tagline: "this site — a personal portfolio compiled as a Rust workspace",
-    description:
-      "Pages are crates, sections are .rs files in a compile log, page transitions are a recompile wipe. Hand-rolled chrome and motion, no UI kit.",
-    facts: [
-      { label: "React 19" },
-      { label: "TypeScript" },
-      { label: "Tailwind CSS v4" },
-      { label: "framer-motion" },
-      { label: "Lenis" },
-      { label: "thatyii.dev ↗", href: "https://thatyii.dev" },
-    ],
-    // no route — it IS the current site
-  },
-  {
-    name: "napi-rs",
-    tagline: "Rust → Node.js FFI, lowered to a procedural macro",
-    description:
-      "Co-creator. Introduced the #[napi] macro, lowering the barrier of binding Rust crates to Node.js native addons and WASI.",
-    facts: [{ label: "★7.8k", href: "https://github.com/napi-rs/napi-rs" }, { label: "Rust" }],
-    route: "/terminal/napi",
-  },
-  {
-    name: "AFFiNE",
-    tagline: "a collaborative knowledge base",
-    description:
-      "Tech leader 2023 → 2025. Led the dev team, built y-octo (a Rust CRDT engine), and shipped AFFiNE.",
-    facts: [
-      { label: "★70.6k", href: "https://github.com/toeverything/AFFiNE" },
-      { label: "Rust" },
-      { label: "TypeScript" },
-      { label: "CRDT" },
-    ],
-    route: "/terminal/affine",
-  },
-  {
-    name: "Perfsee",
-    tagline: "bundle analysis · flamegraphs · scoring",
-    description:
-      "Created at ByteDance — an analyzer for measuring bundles and runtime performance of web applications; inspires rsdoctor.",
-    facts: [
-      { label: "★744", href: "https://github.com/perfsee/perfsee" },
-      { label: "inspires rsdoctor", href: "https://github.com/web-infra-dev/rsdoctor" },
-    ],
-    route: "/terminal/perfsee",
-  },
-];
+export const PROJECTS: ProjectEntry[] = REGISTRY.map((p) => ({
+  name: p.name,
+  tagline: p.tagline,
+  description: p.description,
+  facts: p.facts,
+  route: p.page ? `/terminal${p.page}` : undefined,
+}));
 
 /** Case-insensitive lookup for `show` / `open`. */
 export function findProject(name: string): ProjectEntry | undefined {
