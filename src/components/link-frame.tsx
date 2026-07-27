@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useLocation } from "react-router";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
 
@@ -24,11 +25,21 @@ type Frame = {
  */
 export function LinkFrame() {
   const reduced = useReducedMotion();
+  const { pathname } = useLocation();
   const [enabled, setEnabled] = useState(false);
   const [frame, setFrame] = useState<Frame | null>(null);
   const [pressed, setPressed] = useState(false);
   const target = useRef<HTMLElement | null>(null);
   const nextId = useRef(0);
+
+  // SPA navigation unmounts the framed element without a mousemove, which
+  // would leave the stale square pinned until the pointer next moves —
+  // drop it on every route change.
+  useEffect(() => {
+    target.current = null;
+    setFrame(null);
+    setPressed(false);
+  }, [pathname]);
 
   useEffect(() => {
     const mq = window.matchMedia("(pointer: fine)");
