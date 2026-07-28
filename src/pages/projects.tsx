@@ -68,8 +68,10 @@ function ProjectCardView({ card, index }: { card: Project; index: number }) {
     </>
   );
 
+  // h-full: the grid stretches the motion wrapper per row; the card must
+  // fill it too, or single-line taglines render shorter than their row
   const className =
-    "group flex gap-4 rounded-[2px] border border-steel bg-carbon p-4 transition-colors hover:border-steel-soft";
+    "group flex h-full gap-4 rounded-[2px] border border-steel bg-carbon p-4 transition-colors hover:border-steel-soft";
   // intro page first; GitHub only when no page exists (projects.md §cards)
   const link = card.page ? (
     <Link to={card.page} data-cursor="link" className={className}>
