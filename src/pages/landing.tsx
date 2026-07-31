@@ -2,7 +2,8 @@ import { encodeQrMatrix, SITE_QR_PAYLOAD } from "@/lib/qr";
 import { INNER_HOME_PATH, TERMINAL_HOME_PATH } from "@/lib/crates";
 import { cn } from "@/lib/utils";
 import { COMMITS, logInvoiceAmount, parseLogMessage, type LogCommit } from "@/pages/home/log-data";
-import { LANDING_VISIT_MAX, recordLandingVisit } from "@/pages/landing/visit-count";
+import { recordLandingVisit } from "@/pages/landing/visit-count";
+import { wearFromCount } from "@/pages/landing/wear";
 import "@/pages/landing/receipt.css";
 import { createContext, useContext, useMemo, type CSSProperties, type ReactNode } from "react";
 import { Link } from "react-router";
@@ -16,15 +17,18 @@ import { Link } from "react-router";
  * "Entry for Human" → INNER_HOME_PATH, "Entry for Bot" → TERMINAL_HOME_PATH.
  *
  * Visit count (`fh-landing-visits`, 0–10) only scales thermal fade/missing
- * intensity — paper color stays fixed. See ThermalPrint + visit-count.ts.
+ * intensity — paper color stays fixed. The count is normalized once into a
+ * single 0–1 wear (see wear.ts) that feeds every visual channel. See
+ * ThermalPrint.
  */
 
-/** Wear level for this paint (0 fresh → 10 heavily faded thermal). */
+/** Wear level for this paint (0 fresh → 1 max wear). */
 const WearCtx = createContext(0);
 
 export default function Landing() {
-  const wear = useMemo(() => recordLandingVisit(), []);
-  const wearT = wear / LANDING_VISIT_MAX;
+  // normalized once: every channel (prop, context, data-wear, --receipt-wear)
+  // shares this exact 0–1 number
+  const wear = useMemo(() => wearFromCount(recordLandingVisit()), []);
 
   // Native document scroll (Lenis is not constructed on `/` — see Layout).
   return (
@@ -37,7 +41,7 @@ export default function Landing() {
             data-wear={wear}
             style={
               {
-                ["--receipt-wear" as string]: String(wearT),
+                ["--receipt-wear" as string]: String(wear),
               } satisfies CSSProperties
             }
           >
@@ -58,7 +62,8 @@ export default function Landing() {
 function WhiteSpeckles({ wear }: { wear: number }) {
   const dots = useMemo(() => {
     // 8–14 dots (slightly more when worn) — keep sparse
-    const n = 8 + Math.floor((wear / LANDING_VISIT_MAX) * 6);
+    const n = 8 + Math.floor(wear * 6);
+    // positions/size/opacity seeded from the shared 0–1 wear, stable per paint
     const list: { left: string; top: string; size: number; opacity: number }[] = [];
     for (let i = 0; i < n; i++) {
       const hx = hash01(0x71a2 + wear * 97 + i * 31);
@@ -109,22 +114,51 @@ function hash01(seed: number): number {
   return x / 0x100000000;
 }
 
-/** wearT 0→10 visits as 0..1 — more defects, and gaps only when worn. */
-function defectAt(lineSeed: number, index: number, wearT: number): Defect {
+/** Wear 0 (fresh) → 1 (max) — more defects, and gaps only when worn. */
+function defectAt(lineSeed: number, index: number, wear: number): Defect {
   const r = hash01(lineSeed * 131 + index * 17 + 7);
   // fresh ~7%, max wear ~28% of glyphs
-  const rate = 0.07 + wearT * 0.21;
+  const rate = 0.07 + wear * 0.21;
   if (r > rate) return "ok";
 
   const kind = hash01(lineSeed * 59 + index * 41 + 3);
   // full drop only after a few visits; grows to ~30% of worn glyphs
-  const gapShare = wearT < 0.25 ? 0 : (wearT - 0.25) * 0.4;
+  const gapShare = wear < 0.25 ? 0 : (wear - 0.25) * 0.4;
   if (kind < gapShare) return "gap";
   if (kind < gapShare + 0.22) return "ghost";
   if (kind < gapShare + 0.45) return "faint";
   if (kind < gapShare + 0.62) return "top";
   if (kind < gapShare + 0.78) return "bottom";
   return "smudge";
+}
+
+/**
+ * TS owns the full per-glyph defect visual: the shared 0–1 wear maps to the
+ * final opacity / clip-path / transform here, so the CSS classes carry no
+ * `--receipt-wear` scaling and the two layers cannot disagree. Values match
+ * the pre-consolidation receipt.css calc() formulas exactly.
+ */
+function defectStyle(defect: Defect, wear: number): CSSProperties | undefined {
+  switch (defect) {
+    case "ghost":
+      return { opacity: 0.58 - wear * 0.28 };
+    case "faint":
+      return { opacity: 0.78 - wear * 0.22 };
+    case "gap":
+      return { opacity: 0 };
+    case "top":
+      return { clipPath: `inset(0 0 ${18 + wear * 18}% 0)`, opacity: 0.92 - wear * 0.12 };
+    case "bottom":
+      return { clipPath: `inset(${18 + wear * 18}% 0 0 0)`, opacity: 0.92 - wear * 0.12 };
+    case "smudge":
+      return {
+        opacity: 0.82 - wear * 0.18,
+        transform: `scaleY(${1.03 + wear * 0.04})`,
+        transformOrigin: "bottom center",
+      };
+    default:
+      return undefined;
+  }
 }
 
 function seedFrom(text: string): number {
@@ -150,45 +184,45 @@ function ThermalPrint({
   className?: string;
   as?: "span" | "div";
 }) {
+  // shared 0–1 wear from the single owner (wear.ts); no re-normalization here
   const wear = useContext(WearCtx);
-  const wearT = wear / LANDING_VISIT_MAX;
   const seed = useMemo(() => seedFrom(text), [text]);
 
   const glyphs = useMemo(() => {
     const chars = Array.from(text);
     let lastDefect = false;
     // at high wear, allow adjacent defects sometimes (thermal blotches)
-    const allowAdjacent = wearT > 0.55;
+    const allowAdjacent = wear > 0.55;
     return chars.map((ch, i) => {
       if (ch === " " || ch === "\u00a0") {
         lastDefect = false;
-        return { ch, defect: "ok" as Defect, key: i };
+        return { ch, defect: "ok" as Defect, key: i, style: undefined };
       }
-      let defect = defectAt(seed, i, wearT);
+      let defect = defectAt(seed, i, wear);
       if (defect !== "ok" && lastDefect && !allowAdjacent) defect = "ok";
       // even when adjacent allowed, never two full gaps in a row
       if (defect === "gap" && lastDefect) {
         const prev = chars[i - 1];
-        if (prev && prev !== " " && defectAt(seed, i - 1, wearT) === "gap") {
+        if (prev && prev !== " " && defectAt(seed, i - 1, wear) === "gap") {
           defect = "ghost";
         }
       }
       lastDefect = defect !== "ok";
-      return { ch, defect, key: i };
+      return { ch, defect, key: i, style: defectStyle(defect, wear) };
     });
-  }, [text, seed, wearT]);
+  }, [text, seed, wear]);
 
   // mid-line skip: ~20% fresh → ~58% at max wear
-  const midSkipRate = 0.2 + wearT * 0.38;
+  const midSkipRate = 0.2 + wear * 0.38;
   const midSkip = text.trim().length >= 4 && hash01(seed ^ 0x5f3759df) < midSkipRate;
   // thicker skip band when worn (still ≤ 2px)
-  const skipH = 0.7 + wearT * 0.9 + hash01(seed ^ 22) * (0.4 + wearT * 0.3);
+  const skipH = 0.7 + wear * 0.9 + hash01(seed ^ 22) * (0.4 + wear * 0.3);
   const midSkipStyle = midSkip
     ? ({
-        ["--skip-top" as string]: `${40 + hash01(seed ^ 11) * (12 + wearT * 8)}%`,
+        ["--skip-top" as string]: `${40 + hash01(seed ^ 11) * (12 + wear * 8)}%`,
         ["--skip-h" as string]: `${Math.min(2, skipH)}px`,
-        ["--skip-left" as string]: `${2 + hash01(seed ^ 33) * (12 + wearT * 10)}%`,
-        ["--skip-right" as string]: `${2 + hash01(seed ^ 44) * (12 + wearT * 10)}%`,
+        ["--skip-left" as string]: `${2 + hash01(seed ^ 33) * (12 + wear * 10)}%`,
+        ["--skip-right" as string]: `${2 + hash01(seed ^ 44) * (12 + wear * 10)}%`,
       } satisfies CSSProperties)
     : undefined;
 
@@ -198,11 +232,12 @@ function ThermalPrint({
       style={midSkipStyle}
       aria-label={text}
     >
-      {glyphs.map(({ ch, defect, key }) => (
+      {glyphs.map(({ ch, defect, key, style }) => (
         <span
           key={key}
           aria-hidden
           className={cn("receipt-glyph", defect !== "ok" && `receipt-glyph--${defect}`)}
+          style={style}
         >
           {ch}
         </span>
