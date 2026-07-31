@@ -14,7 +14,9 @@ import { useReducedMotion } from "./use-reduced-motion";
  *
  * Pass `enabled={false}` to skip construction entirely (receipt gate `/` uses
  * native scroll only). Do not use `lenis.stop()` for that — stop still
- * preventDefaults wheel and freezes nested / native scrollers.
+ * preventDefaults wheel and freezes nested / native scrollers. Panels that
+ * freeze the page while staying scrollable (command palette) use the
+ * capture-phase lock in use-scroll-lock.ts instead.
  */
 const LenisCtx = createContext<Lenis | null>(null);
 

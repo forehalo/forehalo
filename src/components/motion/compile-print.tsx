@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
-import { EASE_COMPILE_OUT } from "@/lib/motion";
+import { EASE_COMPILE_OUT, TOKEN_STAGGER } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 /**
@@ -16,7 +16,7 @@ export function CompilePrint({
   text,
   tokens,
   delay = 0,
-  stagger = 0.012,
+  stagger = TOKEN_STAGGER,
   start = true,
   className,
   tokenClassName,

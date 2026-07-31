@@ -1,32 +1,14 @@
 /**
- * Theme resolution (forge dual theme).
+ * Theme preference vocabulary (forge dual theme).
  *
  * Preference: "light" | "dark" | "system" (null/absent storage = system).
- * Resolved appearance always collapses to "light" | "dark".
- *
- * Storage key and resolve logic are shared with the pre-paint FOUC bootstrap
- * in index.html — keep them in sync.
+ * THEME_STORAGE_KEY is shared with the pre-paint FOUC bootstrap in index.html
+ * (which resolves the stored preference into a concrete theme) — keep in sync.
  */
 
 export const THEME_STORAGE_KEY = "fh-theme";
 
 export type ThemePreference = "light" | "dark" | "system";
-export type ResolvedTheme = "light" | "dark";
-
-/** Collapse stored/UI preference + OS media into a concrete theme. */
-export function resolveTheme(
-  preference: ThemePreference | null | undefined,
-  prefersDark: boolean,
-): ResolvedTheme {
-  if (preference === "light" || preference === "dark") return preference;
-  return prefersDark ? "dark" : "light";
-}
-
-/** Parse a stored value; unknown/empty → system. */
-export function parseThemePreference(raw: string | null | undefined): ThemePreference {
-  if (raw === "light" || raw === "dark" || raw === "system") return raw;
-  return "system";
-}
 
 /**
  * Read a CSS custom property from <html> (forge tokens like `--halo`).

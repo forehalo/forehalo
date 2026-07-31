@@ -12,12 +12,16 @@ import type { ReactNode } from "react";
 import { createElement } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router";
-import { useTheme } from "next-themes";
 import { useToast } from "@/components/toaster";
 import { useMotionPref } from "@/hooks/use-reduced-motion";
-import { EASE_COMPILE_OUT } from "@/lib/motion";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
+import {
+  THEME_OPTIONS,
+  useThemePreference,
+  type ThemePreference,
+} from "@/hooks/use-theme-preference";
 import { CRATES, INNER_HOME_PATH } from "@/lib/crates";
-import type { ThemePreference } from "@/lib/theme";
+import { DUR, EASE_COMPILE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,8 +29,6 @@ import { cn } from "@/lib/utils";
  * Fuzzy-find with matched chars in halo. Fully keyboard navigable.
  * Open it from anywhere via `useCommandPalette().toggle()`.
  */
-
-const THEME_OPTIONS = ["system", "light", "dark"] as const satisfies readonly ThemePreference[];
 
 interface Cmd {
   id: string;
@@ -115,7 +117,7 @@ function PaletteOverlay() {
   const navigate = useNavigate();
   const toast = useToast();
   const { reduced, setOverride } = useMotionPref();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { pref, resolved, cycle, set } = useThemePreference();
 
   const [query, setQuery] = useState("");
   const [sel, setSel] = useState(0);
@@ -132,49 +134,9 @@ function PaletteOverlay() {
     }
   }, [isOpen]);
 
-  // Lock page scroll while open without Lenis.stop() — Lenis preventDefaults
-  // every wheel while stopped, which also freezes the palette list. Instead:
-  // capture wheel, scroll the list ourselves, and never let the event reach
-  // Lenis / the document.
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const html = document.documentElement;
-    const body = document.body;
-    const prevHtml = html.style.overflow;
-    const prevBody = body.style.overflow;
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      const list = listRef.current;
-      if (!list || !list.contains(e.target as Node)) return;
-      // Normalize line/page deltas so mouse wheels still move the list.
-      let dy = e.deltaY;
-      if (e.deltaMode === 1) dy *= 16;
-      else if (e.deltaMode === 2) dy *= list.clientHeight;
-      list.scrollTop += dy;
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      const list = listRef.current;
-      if (list && list.contains(e.target as Node)) return;
-      e.preventDefault();
-    };
-
-    // Capture so we run before Lenis's window wheel listener.
-    window.addEventListener("wheel", onWheel, { passive: false, capture: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
-
-    return () => {
-      html.style.overflow = prevHtml;
-      body.style.overflow = prevBody;
-      window.removeEventListener("wheel", onWheel, { capture: true });
-      window.removeEventListener("touchmove", onTouchMove, { capture: true });
-    };
-  }, [isOpen]);
+  // Lock page scroll while open (capture-phase wheel/touch — bypasses Lenis,
+  // see use-scroll-lock for the Lenis.stop() contract).
+  useScrollLock(isOpen, listRef);
 
   const go = useCallback(
     (path: string) => {
@@ -229,15 +191,12 @@ function PaletteOverlay() {
         themeSwitch: true,
         run: () => {
           // ↵ cycles system → light → dark (palette stays open)
-          const cur = parseThemePref(theme);
-          const i = THEME_OPTIONS.indexOf(cur);
-          const next = THEME_OPTIONS[(i + 1) % THEME_OPTIONS.length] ?? "system";
-          setTheme(next);
+          const next = cycle();
           toast(`theme → ${next}`);
         },
       },
     ],
-    [go, toast, reduced, setOverride, close, setTheme, theme],
+    [go, toast, reduced, setOverride, close, cycle],
   );
 
   const filtered = useMemo(() => {
@@ -258,23 +217,18 @@ function PaletteOverlay() {
 
   const applyTheme = useCallback(
     (next: ThemePreference) => {
-      setTheme(next);
+      set(next);
       toast(`theme → ${next}`);
     },
-    [setTheme, toast],
+    [set, toast],
   );
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     const active = filtered[sel]?.cmd;
     if (active?.themeSwitch && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
       e.preventDefault();
-      const cur = parseThemePref(theme);
-      const i = THEME_OPTIONS.indexOf(cur);
-      const next =
-        e.key === "ArrowRight"
-          ? (THEME_OPTIONS[(i + 1) % THEME_OPTIONS.length] ?? "system")
-          : (THEME_OPTIONS[(i - 1 + THEME_OPTIONS.length) % THEME_OPTIONS.length] ?? "system");
-      applyTheme(next);
+      const next = cycle(e.key === "ArrowRight" ? 1 : -1);
+      toast(`theme → ${next}`);
       return;
     }
     if (e.key === "ArrowDown") {
@@ -308,7 +262,7 @@ function PaletteOverlay() {
             initial={{ opacity: 0, scale: 0.98, y: -6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: -6 }}
-            transition={{ duration: 0.2, ease: EASE_COMPILE_OUT }}
+            transition={{ duration: DUR.micro, ease: EASE_COMPILE_OUT }}
             onMouseDown={(e) => e.stopPropagation()}
           >
             {/* input */}
@@ -353,8 +307,8 @@ function PaletteOverlay() {
                       <Highlighted text={cmd.label} match={match} />
                       {cmd.themeSwitch && (
                         <span className="ml-2 text-dim">
-                          · {parseThemePref(theme)}
-                          {theme === "system" && resolvedTheme ? ` (${resolvedTheme})` : ""}
+                          · {pref}
+                          {pref === "system" && resolved ? ` (${resolved})` : ""}
                         </span>
                       )}
                     </span>
@@ -375,11 +329,7 @@ function PaletteOverlay() {
                       </span>
                     )}
                     {cmd.themeSwitch && (
-                      <ThemeSlideSwitch
-                        value={parseThemePref(theme)}
-                        onChange={applyTheme}
-                        reduced={reduced}
-                      />
+                      <ThemeSlideSwitch value={pref} onChange={applyTheme} reduced={reduced} />
                     )}
                   </button>
                 </li>
@@ -408,11 +358,6 @@ function Highlighted({ text, match }: { text: string; match: number[] | null }) 
       ))}
     </>
   );
-}
-
-function parseThemePref(theme: string | undefined): ThemePreference {
-  if (theme === "light" || theme === "dark" || theme === "system") return theme;
-  return "system";
 }
 
 /**

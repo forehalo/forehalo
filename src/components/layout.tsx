@@ -7,9 +7,9 @@ import { LinkFrame } from "@/components/link-frame";
 import { PageBackdrop } from "@/components/page-backdrop";
 import { CommandPaletteProvider } from "@/components/command-palette";
 import { ToastProvider } from "@/components/toaster";
-import { MotionProvider, useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { SmoothScrollProvider, useLenis } from "@/hooks/use-smooth-scroll";
-import { EASE_COMPILE_OUT } from "@/lib/motion";
+import { DUR, EASE_COMPILE_OUT } from "@/lib/motion";
 import { CRATES, INNER_HOME_PATH } from "@/lib/crates";
 
 /**
@@ -37,59 +37,57 @@ export function Layout() {
   const hideFooter = landing || identityHome;
 
   return (
-    <MotionProvider>
-      <ToastProvider>
-        {/* Receipt gate scrolls natively — no Lenis instance on `/`. */}
-        <SmoothScrollProvider enabled={!landing}>
-          <CommandPaletteProvider>
-            <a
-              href="#main"
-              className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-10001 focus:rounded-[2px] focus:border focus:border-halo focus:bg-carbon-2 focus:px-3 focus:py-2 focus:font-mono focus:text-[12px] focus:text-halo"
-            >
-              skip to main
-            </a>
+    <ToastProvider>
+      {/* Receipt gate scrolls natively — no Lenis instance on `/`. */}
+      <SmoothScrollProvider enabled={!landing}>
+        <CommandPaletteProvider>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-10001 focus:rounded-[2px] focus:border focus:border-halo focus:bg-carbon-2 focus:px-3 focus:py-2 focus:font-mono focus:text-[12px] focus:text-halo"
+          >
+            skip to main
+          </a>
 
-            {!landing && <PageBackdrop />}
+          {!landing && <PageBackdrop />}
 
-            {!landing && <Navbar />}
-            {!landing && <RecompileWipe />}
+          {!landing && <Navbar />}
+          {!landing && <RecompileWipe />}
 
-            {/* sticky-footer shell: main stretches so the footer stays at the
+          {/* sticky-footer shell: main stretches so the footer stays at the
                 viewport bottom even when the page content is short */}
-            <div className="flex min-h-dvh flex-col">
-              <main
-                id="main"
-                className={landing ? "relative z-10 flex-1" : "relative z-10 flex-1 pt-14"}
-              >
-                <Outlet />
-              </main>
-              {!hideFooter && (
-                <div className="relative z-10">
-                  <Footer />
-                </div>
-              )}
-            </div>
-
-            {/* film grain: opacity + blend from forge theme vars — skipped on receipt */}
-            {!landing && (
-              <div
-                aria-hidden
-                className="pointer-events-none fixed inset-0 z-9500"
-                style={{
-                  backgroundImage: "url(/grain.png)",
-                  backgroundRepeat: "repeat",
-                  backgroundSize: "512px 512px",
-                  opacity: "var(--grain-opacity)",
-                  mixBlendMode: "var(--grain-blend)" as CSSProperties["mixBlendMode"],
-                }}
-              />
+          <div className="flex min-h-dvh flex-col">
+            <main
+              id="main"
+              className={landing ? "relative z-10 flex-1" : "relative z-10 flex-1 pt-14"}
+            >
+              <Outlet />
+            </main>
+            {!hideFooter && (
+              <div className="relative z-10">
+                <Footer />
+              </div>
             )}
+          </div>
 
-            {!landing && <LinkFrame />}
-          </CommandPaletteProvider>
-        </SmoothScrollProvider>
-      </ToastProvider>
-    </MotionProvider>
+          {/* film grain: opacity + blend from forge theme vars — skipped on receipt */}
+          {!landing && (
+            <div
+              aria-hidden
+              className="pointer-events-none fixed inset-0 z-9500"
+              style={{
+                backgroundImage: "url(/grain.png)",
+                backgroundRepeat: "repeat",
+                backgroundSize: "512px 512px",
+                opacity: "var(--grain-opacity)",
+                mixBlendMode: "var(--grain-blend)" as CSSProperties["mixBlendMode"],
+              }}
+            />
+          )}
+
+          {!landing && <LinkFrame />}
+        </CommandPaletteProvider>
+      </SmoothScrollProvider>
+    </ToastProvider>
   );
 }
 
@@ -141,7 +139,7 @@ function RecompileWipe() {
           initial={{ y: "-100%" }}
           animate={{ y: "102%" }}
           exit={{ opacity: 0, transition: { duration: 0.12 } }}
-          transition={{ duration: 0.65, ease: EASE_COMPILE_OUT }}
+          transition={{ duration: DUR.page, ease: EASE_COMPILE_OUT }}
           style={{ pointerEvents: "none" }}
         >
           {/* trailing compile log, riding the scanline */}

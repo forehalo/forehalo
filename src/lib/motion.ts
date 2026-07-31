@@ -6,9 +6,9 @@ export const EASE_COMPILE_OUT = [0.16, 1, 0.3, 1] as [number, number, number, nu
 export const EASE_EXIT_IN = [0.7, 0, 0.2, 1] as [number, number, number, number];
 
 export const DUR = {
+  /** micro UI fades (palette panel) */
   micro: 0.2,
-  ui: 0.38,
-  section: 0.9,
+  /** page-level transitions (recompile wipe) */
   page: 0.65,
 } as const;
 
