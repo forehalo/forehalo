@@ -5,7 +5,7 @@ import { SiAffine } from "@icons-pack/react-simple-icons";
  * Both the `/projects` card index and the /terminal fork (`ls projects`,
  * `show`, `open`) derive their view models from this list — add a project
  * HERE once and both surfaces pick it up:
- *   - card grid: name / tagline / logo, linking to `page` or `github`
+ *   - card grid: title / tagline / logo, linking to `page`, `github`, or `url`
  *   - terminal: name / tagline / description / facts, `open` targets the
  *     /terminal fork of `page` (derived), or hints `url`/`github`
  * Every fact must be real and consistent with @/pages/home/log-data
@@ -20,8 +20,10 @@ export interface ProjectFact {
 export type ProjectLogo = { kind: "img"; src: string } | { kind: "simple"; Icon: typeof SiAffine };
 
 export interface Project {
-  /** display name AND the terminal lookup key (`show <name>`) */
+  /** terminal lookup key (`show <name>`) and default display name */
   name: string;
+  /** display name when it differs from the terminal key (card grid) */
+  title?: string;
   /** one-sentence intro (card lower half, `ls projects` right column) */
   tagline: string;
   /** longer paragraph for the terminal `show` detail block */
@@ -29,7 +31,8 @@ export interface Project {
   /** on-site intro page — preferred card target; its /terminal fork route
       is derived as `/terminal${page}` */
   page?: string;
-  github: string;
+  /** source repo — omitted for private repos (never link those) */
+  github?: string;
   /** live deployment, when the project has one */
   url?: string;
   facts: ProjectFact[];
@@ -77,10 +80,10 @@ export const PROJECTS: Project[] = [
   },
   {
     name: "thatreceipt",
+    title: "That Receipt",
     tagline: "Design a cyber thermal paper receipt in the browser.",
     description:
       "A browser toy for cyber thermal receipts — paper grain, faded ink, missing characters, print-head skip lines, crumple wear. Share a link or save a PNG.",
-    github: "https://github.com/yii-labs/thatreceipt",
     url: "https://receipt.thatyii.dev",
     facts: [
       { label: "receipt.thatyii.dev ↗", href: "https://receipt.thatyii.dev" },

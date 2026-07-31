@@ -26,6 +26,9 @@ import { COMMITS, type LogCommit } from "@/pages/home/log-data";
  * lane lines stretch seamlessly when a row's macroExpand grows the row.
  * Hover/click a row → macroExpand unfolds the diff panel full-width
  * (under the gutter), its content indented to the commit column.
+ * (Expansion grows the page downward only — home pins its vertical
+ * centering to the collapsed height, so unfolding never re-centers
+ * the page under the cursor.)
  *
  * Commit rows live in `log-data.ts` (shared with the receipt invoice).
  */

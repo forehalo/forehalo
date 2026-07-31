@@ -31,8 +31,11 @@ export default function Home() {
   }, []);
 
   return (
-    // single screen under the TopBar (pt-14 / 3.5rem), content vertically centered
-    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col justify-center">
+    // fixed top padding like /projects — NOT justify-center: centering
+    // re-centers on every height change, so a log row's macroExpand
+    // unfolding shifted the whole page under the cursor. Fixed padding
+    // keeps the top anchored; expansion grows the page downward only.
+    <div className="py-10 md:py-14">
       <Hero start onIntroDone={onIntroDone} skipIntro={skipIntro} />
       <LogSection start={introDone} skipReveal={skipIntro} />
     </div>
