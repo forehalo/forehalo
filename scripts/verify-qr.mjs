@@ -1,41 +1,46 @@
 /**
- * Exercises the real shipped encode path (src/lib/qr.ts → qrcode).
- * Run: node scripts/verify-qr.mjs
- * Exit 0 only when payload + matrix encode behave correctly.
+ * Exercises the REAL shipped encode path (src/lib/qr.ts → qrcode).
+ * Run: pnpm verify:qr (or: node scripts/verify-qr.mjs)
+ * Exit 0 only when the payload + matrix contract holds for the actual
+ * encoder the landing ships.
+ *
+ * This script imports encodeQrMatrix / SITE_QR_PAYLOAD straight from
+ * src/lib/qr.ts — Node 24 type-stripping executes the .ts directly, with a
+ * tiny resolve hook mapping the app's `@/ → src/` alias. There is no copied
+ * encoder here; the checks run against the shipped one.
  */
-import { createRequire } from "node:module";
+import { registerHooks } from "node:module";
+import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const require = createRequire(import.meta.url);
 
-// Load the same library the app uses; mirror encodeQrMatrix without TS transpile.
-const QRCode = require("qrcode");
+// Map the repo's `@/ → src/` alias so Node can load src/lib/qr.ts without a
+// bundler. registerHooks must be in place before the dynamic import below.
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (!specifier.startsWith("@/")) return nextResolve(specifier, context);
+    const base = path.join(root, "src", specifier.slice(2));
+    const target = path.extname(base)
+      ? base
+      : [base + ".ts", base + ".tsx"].find((p) => fs.existsSync(p));
+    if (!target || !fs.existsSync(target)) {
+      throw new Error(`verify-qr: cannot resolve @/ specifier "${specifier}"`);
+    }
+    return { shortCircuit: true, url: pathToFileURL(target).href };
+  },
+});
+
+const { encodeQrMatrix, SITE_QR_PAYLOAD } = await import(
+  pathToFileURL(path.join(root, "src/lib/qr.ts")).href
+);
 
 const EXPECTED = "https://thatyii.dev";
 
-function encodeQrMatrix(payload, errorCorrectionLevel = "H") {
-  const qr = QRCode.create(payload, { errorCorrectionLevel });
-  const { modules } = qr;
-  return {
-    size: modules.size,
-    get: (row, col) => modules.get(row, col) === 1,
-    darkCount() {
-      let n = 0;
-      for (let r = 0; r < modules.size; r++) {
-        for (let c = 0; c < modules.size; c++) {
-          if (modules.get(r, c) === 1) n++;
-        }
-      }
-      return n;
-    },
-  };
-}
-
-// 1) Source-of-truth constant from shipped routes module (read as text — no bundler)
-import fs from "node:fs";
+// 1) Source-of-truth contract (read as text — no bundler). These assert the
+//    leaf definitions + call sites the app compiles against.
 const routesSrc = fs.readFileSync(path.join(root, "src/lib/routes.ts"), "utf8");
 const qrSrc = fs.readFileSync(path.join(root, "src/lib/qr.ts"), "utf8");
 const landingSrc = fs.readFileSync(path.join(root, "src/pages/landing.tsx"), "utf8");
@@ -58,8 +63,8 @@ if (!qrSrc.includes('from "qrcode"') && !qrSrc.includes("from 'qrcode'")) {
 if (!landingSrc.includes("encodeQrMatrix") || !landingSrc.includes("SITE_QR_PAYLOAD")) {
   failures.push("landing must call encodeQrMatrix with SITE_QR_PAYLOAD");
 }
-if (!landingSrc.includes("click to scan")) {
-  failures.push("landing missing literal 'click to scan'");
+if (!landingSrc.includes("scan to enter official website")) {
+  failures.push("landing missing literal 'scan to enter official website'");
 }
 if (!landingSrc.includes("INNER_HOME_PATH")) {
   failures.push("landing must navigate via INNER_HOME_PATH");
@@ -68,13 +73,29 @@ if (!appSrc.includes('path="home"') || !appSrc.includes("Landing")) {
   failures.push("app.tsx must mount Landing at / and Home at path=home");
 }
 
-// 2) Real encode — matrix for expected URL is non-trivial and stable
-const a = encodeQrMatrix(EXPECTED);
-const b = encodeQrMatrix(EXPECTED);
+// 2) Real encode — the imported SITE_QR_PAYLOAD must be the expected URL,
+//    and its matrix must be non-trivial, deterministic, and payload-specific.
+if (SITE_QR_PAYLOAD !== EXPECTED) {
+  failures.push(`SITE_QR_PAYLOAD is "${SITE_QR_PAYLOAD}", expected "${EXPECTED}"`);
+}
+
+function darkCount(matrix) {
+  let n = 0;
+  for (let r = 0; r < matrix.size; r++) {
+    for (let c = 0; c < matrix.size; c++) {
+      if (matrix.get(r, c)) n++;
+    }
+  }
+  return n;
+}
+
+const a = encodeQrMatrix(SITE_QR_PAYLOAD, "H");
+const b = encodeQrMatrix(SITE_QR_PAYLOAD, "H");
 const other = encodeQrMatrix("https://example.com");
 
 if (a.size < 21) failures.push(`matrix size too small: ${a.size}`);
-if (a.darkCount() < 50) failures.push(`too few dark modules: ${a.darkCount()}`);
+const darkA = darkCount(a);
+if (darkA < 50) failures.push(`too few dark modules: ${darkA}`);
 
 let same = true;
 for (let r = 0; r < a.size; r++) {
@@ -99,20 +120,16 @@ if (a.size !== other.size) {
 }
 if (!differs) failures.push("different payloads produced identical matrices");
 
-// 3) Payload string identity (the encode input)
-if (EXPECTED !== "https://thatyii.dev") {
-  failures.push("EXPECTED payload mismatch");
-}
-
 const report = {
-  payload: EXPECTED,
+  encoder: "src/lib/qr.ts (imported, not copied)",
+  payload: SITE_QR_PAYLOAD,
   matrixSize: a.size,
-  darkModules: a.darkCount(),
+  darkModules: darkA,
   deterministic: same,
   differsFromOtherUrl: differs,
   sourceChecks: {
     routesPayload: routesSrc.includes(`SITE_QR_PAYLOAD = "https://thatyii.dev"`),
-    landingScanLabel: landingSrc.includes("click to scan"),
+    landingScanLabel: landingSrc.includes("scan to enter official website"),
     landingNav: landingSrc.includes("INNER_HOME_PATH"),
     appHomeRoute: appSrc.includes('path="home"'),
   },
