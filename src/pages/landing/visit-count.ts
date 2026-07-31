@@ -2,6 +2,11 @@
  * Landing (`/`) visit counter — scales thermal print wear only (not paper color).
  * Stored in localStorage; clamped to [0, 10]. Resets after TTL so the receipt
  * never stays permanently unreadable.
+ *
+ * All storage access goes through the `LandingStorage` port (default:
+ * `globalThis.localStorage`, guarded exactly like the old inline try/catch
+ * calls) so the TTL / clamp / legacy-migration logic is exercisable without
+ * monkey-patching the global.
  */
 
 export const LANDING_VISIT_KEY = "fh-landing-visits";
@@ -9,6 +14,29 @@ export const LANDING_VISIT_MIN = 0;
 export const LANDING_VISIT_MAX = 10;
 /** Counter expires this long after the last recorded visit. */
 export const LANDING_VISIT_TTL_MS = 60_000;
+
+/** Minimal storage port — injectable so the counter logic is testable in isolation. */
+export type LandingStorage = {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+};
+
+const defaultStorage: LandingStorage = {
+  getItem(key) {
+    try {
+      return globalThis.localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem(key, value) {
+    try {
+      globalThis.localStorage.setItem(key, value);
+    } catch {
+      /* private mode / quota */
+    }
+  },
+};
 
 type VisitState = {
   count: number;
@@ -20,9 +48,9 @@ function clamp(n: number): number {
   return Math.min(LANDING_VISIT_MAX, Math.max(LANDING_VISIT_MIN, n));
 }
 
-function readState(): VisitState | null {
+function readState(storage: LandingStorage): VisitState | null {
   try {
-    const raw = localStorage.getItem(LANDING_VISIT_KEY);
+    const raw = storage.getItem(LANDING_VISIT_KEY);
     if (raw == null || raw === "") return null;
 
     // legacy: bare integer from before TTL
@@ -41,19 +69,11 @@ function readState(): VisitState | null {
   }
 }
 
-function writeState(state: VisitState): void {
+function writeState(storage: LandingStorage, state: VisitState): void {
   try {
-    localStorage.setItem(LANDING_VISIT_KEY, JSON.stringify(state));
+    storage.setItem(LANDING_VISIT_KEY, JSON.stringify(state));
   } catch {
     /* private mode / quota */
-  }
-}
-
-function clearState(): void {
-  try {
-    localStorage.removeItem(LANDING_VISIT_KEY);
-  } catch {
-    /* ignore */
   }
 }
 
@@ -61,26 +81,18 @@ function isExpired(ts: number, now = Date.now()): boolean {
   return now - ts > LANDING_VISIT_TTL_MS;
 }
 
-/** Current wear level (0 = fresh). Expired / missing storage → 0. */
-export function getLandingVisitCount(): number {
-  const state = readState();
-  if (!state) return LANDING_VISIT_MIN;
-  if (isExpired(state.ts)) {
-    clearState();
-    return LANDING_VISIT_MIN;
-  }
-  return state.count;
-}
-
 /**
- * Age for this paint, then bump the counter (and refresh TTL) for the next visit.
- * If the previous counter expired, starts from 0 again.
+ * Age for this paint, then bump the counter (and refresh TTL) for the next
+ * visit. Returns the NEW (post-bump) count — the aging THIS paint renders —
+ * so a caller writing via a lazy `useState` initializer shows the bump on
+ * first paint instead of one visit late. If the previous counter expired,
+ * starts from 0 again.
  */
-export function recordLandingVisit(): number {
+export function recordLandingVisit(storage: LandingStorage = defaultStorage): number {
   const now = Date.now();
-  const state = readState();
+  const state = readState(storage);
   const age = state && !isExpired(state.ts, now) ? state.count : LANDING_VISIT_MIN;
   const next = clamp(age + 1);
-  writeState({ count: next, ts: now });
-  return age;
+  writeState(storage, { count: next, ts: now });
+  return next;
 }

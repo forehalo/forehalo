@@ -5,7 +5,14 @@ import { COMMITS, logInvoiceAmount, parseLogMessage, type LogCommit } from "@/pa
 import { recordLandingVisit } from "@/pages/landing/visit-count";
 import { wearFromCount } from "@/pages/landing/wear";
 import "@/pages/landing/receipt.css";
-import { createContext, useContext, useMemo, type CSSProperties, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { Link } from "react-router";
 
 /**
@@ -26,9 +33,11 @@ import { Link } from "react-router";
 const WearCtx = createContext(0);
 
 export default function Landing() {
-  // normalized once: every channel (prop, context, data-wear, --receipt-wear)
-  // shares this exact 0–1 number
-  const wear = useMemo(() => wearFromCount(recordLandingVisit()), []);
+  // One-shot at mount: the visit is recorded in a lazy state initializer (not
+  // a per-render side effect), so the FIRST paint already shows the bumped
+  // wear. Every channel (prop, context, data-wear, --receipt-wear) shares
+  // this exact 0–1 number.
+  const [wear] = useState(() => wearFromCount(recordLandingVisit()));
 
   // Native document scroll (Lenis is not constructed on `/` — see Layout).
   return (

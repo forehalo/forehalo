@@ -1,4 +1,5 @@
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { INTRO_REVEAL_HOLD, introRevealAt } from "@/pages/home/intro-session";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
@@ -116,9 +117,9 @@ const TOTAL_CHARS = LINE_LENGTHS.reduce((a, b) => a + b, 0);
 /** pause between lines (ms) */
 const LINE_BREAK_PAUSE = 140;
 /** the log reveal starts once the `to build, …` line has fully typed… */
-const REVEAL_AT = TOTAL_CHARS - LINE_LENGTHS[LINE_LENGTHS.length - 1];
+const REVEAL_AT = introRevealAt(TOTAL_CHARS, LINE_LENGTHS[LINE_LENGTHS.length - 1]);
 /** …and the final line holds until the reveal has finished (≈1s) */
-const REVEAL_HOLD = 1000;
+const REVEAL_HOLD = INTRO_REVEAL_HOLD;
 
 function TypeIntro({
   start,

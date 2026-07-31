@@ -10,17 +10,15 @@ import { hasHomeIntroPlayed, markHomeIntroPlayed } from "@/pages/home/intro-sess
  * gate at `/` via QR. (No boot/loading screen — the hero plays on load.
  * Home opts out of the Layout's Footer.)
  *
- * Intro animation runs once per browser (localStorage `fh-home-intro-played`);
- * remounts and reloads skip the type-in after the first play.
- *
- * `skipIntro` is fixed at mount. The hero marks localStorage as soon as the
- * log may reveal (before the final verse line finishes typing); re-reading
- * storage on every render would flip skipIntro mid-animation and freeze the
- * typewriter on the last line.
+ * Intro animation runs once per browser — the latch decision, the early-mark
+ * timing, and the reveal hold are all owned by intro-session.ts (see there).
+ * `skipIntro` is fixed at mount; the hero marks storage at the reveal point,
+ * before the final verse line finishes.
  */
 
 export default function Home() {
-  // once per mount — do not re-read after markHomeIntroPlayed()
+  // decided once by intro-session.ts (never re-read after deciding) — the
+  // mark fires at the reveal point, before the final verse finishes (see there)
   const [skipIntro] = useState(() => hasHomeIntroPlayed());
   // the log's reveal waits for the hero's typing intro to finish
   const [introDone, setIntroDone] = useState(skipIntro);
