@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { complete } from "@/pages/terminal/complete";
 import { createShell } from "@/pages/terminal/cli";
-import { tokenize } from "@/pages/terminal/shell";
 
 /**
  * Repl — the interactive shell of the /terminal home fork (terminal.md §repl).
  * History is an ordered list of echoed input lines (with prompt) and output
  * nodes. On mount it automatically runs `help` (product requirement, guarded
- * by a ref so it fires once). Keyboard: Enter runs, ArrowUp/Down cycle past
- * inputs, Tab completes the current token against shell.candidates(),
+ * by a ref so it fires once) — the boot line is echoed but deliberately NOT
+ * recorded in history, so ArrowUp only surfaces commands the user typed.
+ * Keyboard: Enter runs, ArrowUp/Down cycle past inputs, Tab completes the
+ * current token via the pure complete() helper against shell.candidates,
  * Ctrl+L clears. Decorative motion is essentially absent; the auto-scroll
  * behavior is gated on useReducedMotion() per design.md §9.
  */
@@ -51,8 +53,11 @@ export function Repl() {
   const shell = useMemo(
     () =>
       createShell({
-        emit: (node) =>
-          setEntries((prev) => [...prev, { id: ++idRef.current, kind: "output", node }]),
+        emit: (node) => {
+          // id allocated OUTSIDE the updater — setState updaters stay pure
+          const id = ++idRef.current;
+          setEntries((prev) => [...prev, { id, kind: "output", node }]);
+        },
         navigate,
         clear: () => setEntries([]),
       }),
@@ -60,19 +65,22 @@ export function Repl() {
   );
 
   const runInput = useCallback(
-    async (input: string) => {
-      setEntries((prev) => [...prev, { id: ++idRef.current, kind: "input", text: input }]);
-      if (input.trim()) setPastInputs((prev) => [...prev, input]);
+    async (input: string, record = true) => {
+      // id allocated OUTSIDE the updater — setState updaters stay pure
+      const id = ++idRef.current;
+      setEntries((prev) => [...prev, { id, kind: "input", text: input }]);
+      if (record && input.trim()) setPastInputs((prev) => [...prev, input]);
       await shell.run(input);
     },
     [shell],
   );
 
-  // boot: echo + run `help` once per mount
+  // boot: echo + run `help` once per mount; not history-recorded (record=false)
+  // so ArrowUp never surfaces a command the user didn't type
   useEffect(() => {
     if (bootedRef.current) return;
     bootedRef.current = true;
-    void runInput("help");
+    void runInput("help", false);
   }, [runInput]);
 
   // keep the latest entry in view (instant under reduced motion)
@@ -80,27 +88,10 @@ export function Repl() {
     endRef.current?.scrollIntoView({ block: "end", behavior: reduced ? "auto" : "smooth" });
   }, [entries, reduced]);
 
-  /** Tab: complete the current token to the sole candidate or common prefix */
-  const complete = useCallback(() => {
-    const trailingSpace = /\s$/.test(value);
-    const tokens = tokenize(value);
-    const fragment = trailingSpace ? "" : (tokens.pop() ?? "");
-    const matches = shell.candidates().filter((c) => c.startsWith(fragment));
-    if (matches.length === 0) return;
-
-    let replacement: string;
-    if (matches.length === 1) {
-      replacement = matches[0];
-    } else {
-      let prefix = matches[0];
-      for (const m of matches.slice(1)) {
-        while (!m.startsWith(prefix)) prefix = prefix.slice(0, -1);
-      }
-      if (prefix.length <= fragment.length) return; // ambiguous — no-op
-      replacement = prefix;
-    }
-    const head = tokens.join(" ");
-    setValue(head ? `${head} ${replacement}` : replacement);
+  /** Tab: complete the current token via the pure complete() helper */
+  const handleTab = useCallback(() => {
+    const completed = complete(value, shell.candidates);
+    if (completed !== value) setValue(completed);
   }, [value, shell]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -129,7 +120,7 @@ export function Repl() {
       }
     } else if (e.key === "Tab") {
       e.preventDefault();
-      complete();
+      handleTab();
     } else if (e.key === "l" && e.ctrlKey) {
       e.preventDefault();
       setEntries([]);

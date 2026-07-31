@@ -28,8 +28,8 @@ export interface ShellDeps {
 
 export interface Shell {
   run(input: string): Promise<void>;
-  /** Tab-completion candidates: command names + paths + project names */
-  candidates(): string[];
+  /** stable Tab-completion candidates: command names + paths + project names */
+  candidates: string[];
 }
 
 /** one dim output line */
@@ -161,14 +161,15 @@ export function createShell({ emit, navigate, clear }: ShellDeps): Shell {
     }
   }
 
-  function candidates(): string[] {
-    return [
-      ...buildCli().commands.map((cmd) => cmd.name),
-      "career",
-      "projects",
-      ...PROJECTS.map((p) => p.name),
-    ];
-  }
+  // Static command tree — built ONCE as the stable candidate list. Only `run`
+  // needs a fresh instance per call (cac keeps matchedCommand state across
+  // parses), so completion never rebuilds the tree.
+  const candidates: string[] = [
+    ...buildCli().commands.map((cmd) => cmd.name),
+    "career",
+    "projects",
+    ...PROJECTS.map((p) => p.name),
+  ];
 
   return { run, candidates };
 }
