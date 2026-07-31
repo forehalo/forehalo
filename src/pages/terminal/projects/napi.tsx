@@ -1,11 +1,15 @@
 import { Link } from "react-router";
 import { highlightLine } from "@/lib/highlight";
+import { formatStars } from "@/lib/projects";
 import { DocHeader, DocKv, DocLink, DocList, DocSection } from "@/pages/terminal/doc";
 import { PagerHint, usePager } from "@/pages/terminal/pager";
 import { PROJECTS } from "@/pages/terminal/data/projects";
 import { AFTER_CODE, GLUE_ELIMINATED, RAW_TOTAL } from "@/pages/napi/raw-binding";
 
 const entry = PROJECTS.find((p) => p.route === "/terminal/napi");
+/** stars/version are registry facts — formatted here, never hardcoded */
+const stars = entry?.stars ? formatStars(entry.stars) : "";
+const version = entry?.version ?? "";
 
 const AFTER_LINES = AFTER_CODE.split("\n");
 
@@ -14,9 +18,9 @@ const AFTER_LINES = AFTER_CODE.split("\n");
  * (terminal.md §projects). Every fact is lifted from the real page
  * (@/pages/napi): the hero one-liner, the Expander's 118→4 line math and
  * AFTER_CODE, the Anatomy capability glosses, and the Ecosystem trust list.
- * ★7.8k from @/pages/terminal/data/projects; crate 2.16.13 from the
- * PAGE_LOG in @/components/layout. Text only — nothing animates, so no
- * reduced-motion gating is needed.
+ * Stars and crate version come from the registry via
+ * @/pages/terminal/data/projects (formatted by `formatStars`). Text only —
+ * nothing animates, so no reduced-motion gating is needed.
  */
 export default function TerminalNapi() {
   // less(1) keys: j/k scroll, q quits to /terminal (terminal.md §pager)
@@ -127,13 +131,13 @@ export default function TerminalNapi() {
 
         <DocSection title="LINKS">
           <DocKv k="repo">
-            <DocLink href="https://github.com/napi-rs/napi-rs">napi-rs/napi-rs</DocLink> — ★7.8k
+            <DocLink href="https://github.com/napi-rs/napi-rs">napi-rs/napi-rs</DocLink> — {stars}
           </DocKv>
           <DocKv k="docs">
             <DocLink href="https://napi.rs">napi.rs</DocLink>
           </DocKv>
           <DocKv k="crate">
-            <DocLink href="https://crates.io/crates/napi">napi</DocLink> — v2.16.13
+            <DocLink href="https://crates.io/crates/napi">napi</DocLink> — v{version}
           </DocKv>
         </DocSection>
 

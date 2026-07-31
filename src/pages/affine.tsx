@@ -3,6 +3,7 @@ import { CanvasHero } from "@/pages/affine/canvas-hero";
 import { ModeCanvas } from "@/pages/affine/mode-canvas";
 import { SyncHero } from "@/pages/affine/sync-hero";
 import { EngineLink } from "@/pages/affine/engine-link";
+import { PROJECTS, formatStars } from "@/lib/projects";
 import "@/pages/affine/affine.css";
 
 /**
@@ -15,8 +16,9 @@ import "@/pages/affine/affine.css";
  */
 
 const META_TITLE = "AFFiNE — the knowledge canvas · Yii";
-const META_DESC =
-  "Liu Yi was tech leader of the AFFiNE dev team (2023 → 2025): server-side features — MCP server, access tokens, subscriptions — CI/release infra, and integrating y-octo as the CRDT engine. 70.6k stars.";
+/** the registry entry behind this page — the star count is derived */
+const AFFINE = PROJECTS.find((p) => p.page === "/affine");
+const META_DESC = `Liu Yi was tech leader of the AFFiNE dev team (2023 → 2025): server-side features — MCP server, access tokens, subscriptions — CI/release infra, and integrating y-octo as the CRDT engine. ${AFFINE?.stars ? `${formatStars(AFFINE.stars).slice(1)} stars` : ""}.`;
 
 export default function Affine() {
   // page meta (restored on unmount)

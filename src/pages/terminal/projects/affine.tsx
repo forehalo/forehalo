@@ -1,9 +1,13 @@
 import { Link } from "react-router";
+import { formatStars } from "@/lib/projects";
 import { DocHeader, DocKv, DocLink, DocList, DocSection } from "@/pages/terminal/doc";
 import { PagerHint, usePager } from "@/pages/terminal/pager";
 import { PROJECTS } from "@/pages/terminal/data/projects";
 
 const entry = PROJECTS.find((p) => p.route === "/terminal/affine");
+/** stars/version are registry facts — formatted here, never hardcoded */
+const stars = entry?.stars ? formatStars(entry.stars) : "";
+const version = entry?.version ?? "";
 
 /**
  * /terminal/affine — man-page fork of /affine (terminal.md §projects).
@@ -11,7 +15,8 @@ const entry = PROJECTS.find((p) => p.route === "/terminal/affine");
  * @/pages/affine/*): the hero copy, the five blocks of the mode canvas, the
  * sync claim ("many cursors, one document, zero conflicts"), the y-octo
  * engine story and its (illustrative) cargo-test compat readout, the
- * META_DESC role summary, plus version 0.25.0 from the layout PAGE_LOG.
+ * META_DESC role summary, plus version and star count from the shared
+ * registry (@/lib/projects, via the terminal adapter).
  * Pure text — the terminal fork drops the canvas/cursor exhibits.
  */
 
@@ -36,7 +41,7 @@ export default function TerminalAffine() {
         <DocHeader title="AFFiNE(1)" tagline={entry?.tagline} />
 
         <DocSection title="NAME">
-          <p>affine — a collaborative knowledge base · v0.25.0</p>
+          <p>affine — a collaborative knowledge base · v{version}</p>
         </DocSection>
 
         <DocSection title="DESCRIPTION">
@@ -82,7 +87,7 @@ export default function TerminalAffine() {
               "server-side features: MCP server, access tokens, subscriptions",
               "CI / release infra",
               <>
-                <span className="text-halo">★70.6k</span> on GitHub — one of the most-starred
+                <span className="text-halo">{stars}</span> on GitHub — one of the most-starred
                 open-source knowledge apps
               </>,
             ]}
@@ -99,7 +104,7 @@ export default function TerminalAffine() {
             <DocKv k="engine">
               <DocLink href="https://github.com/y-crdt/y-octo">github.com/y-crdt/y-octo</DocLink>
             </DocKv>
-            <DocKv k="version">0.25.0</DocKv>
+            <DocKv k="version">{version}</DocKv>
           </div>
         </DocSection>
 

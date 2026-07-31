@@ -2,11 +2,7 @@
  * Career log data — shared by the home log section and the receipt gate invoice.
  * Newest first, every fact verified (design.md §14 / home log).
  */
-
-export interface FactChip {
-  label: string;
-  href?: string;
-}
+import { PROJECTS, formatStars, type Project, type ProjectFact } from "@/lib/projects";
 
 export interface LogCommit {
   sha: string;
@@ -23,10 +19,20 @@ export interface LogCommit {
   message: string;
   tags: string[];
   date: string;
-  facts?: FactChip[];
+  facts?: ProjectFact[];
   diff: string[];
   /** detail-page route, rendered as `Read More →` */
   linkChip?: { to: string };
+}
+
+/**
+ * Registry-derived `★` fact for a commit, matched via its detail page
+ * (projects.md §data). Star counts live once — in @/lib/projects — and
+ * render here through `formatStars`; no commit hardcodes a star string.
+ */
+function starFact(page: string | undefined): ProjectFact[] {
+  const project: Project | undefined = PROJECTS.find((p) => p.page === page);
+  return project?.stars ? [{ label: formatStars(project.stars), href: project.github }] : [];
 }
 
 /** the full log — newest first, as `git log --graph` prints */
@@ -49,7 +55,7 @@ export const COMMITS: LogCommit[] = [
     message: "at(toeverything): tech leader · ship AFFiNE",
     tags: ["Rust", "TypeScript", "CRDT"],
     date: "2023 → 2025",
-    facts: [{ label: "★70.6k", href: "https://github.com/toeverything/AFFiNE" }],
+    facts: starFact("/affine"),
     diff: [
       "+ led the dev team",
       "+ built y-octo (Rust CRDT engine)",
@@ -64,7 +70,7 @@ export const COMMITS: LogCommit[] = [
     message: "at(napi-rs): co-creator · implemented #[napi]",
     tags: ["Rust"],
     date: "2021 →",
-    facts: [{ label: "★7.8k", href: "https://github.com/napi-rs/napi-rs" }],
+    facts: starFact("/napi"),
     diff: ["+ introduce #[napi] macro for Rust → Node.js FFI"],
     linkChip: { to: "/napi" },
   },
@@ -76,7 +82,7 @@ export const COMMITS: LogCommit[] = [
     tags: ["TypeScript", "Rust"],
     date: "2020 → 2023",
     facts: [
-      { label: "★744", href: "https://github.com/perfsee/perfsee" },
+      ...starFact("/perfsee"),
       { label: "inspires rsdoctor", href: "https://github.com/web-infra-dev/rsdoctor" },
     ],
     diff: [

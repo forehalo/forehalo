@@ -8,8 +8,9 @@ import { SiAffine } from "@icons-pack/react-simple-icons";
  *   - card grid: title / tagline / logo, linking to `page`, `github`, or `url`
  *   - terminal: name / tagline / description / facts, `open` targets the
  *     /terminal fork of `page` (derived), or hints `url`/`github`
- * Every fact must be real and consistent with @/pages/home/log-data
- * (star counts, roles, dates — design.md §14).
+ * Every fact must be real (design.md §14). Star counts and versions are
+ * structured fields (`stars` / `version`); the `★` display is derived via
+ * `formatStars`, and @/pages/home/log-data derives its star facts from here.
  */
 
 export interface ProjectFact {
@@ -18,6 +19,15 @@ export interface ProjectFact {
 }
 
 export type ProjectLogo = { kind: "img"; src: string } | { kind: "simple"; Icon: typeof SiAffine };
+
+/**
+ * Format a raw star count for display (projects.md §data): ≥1000 → one
+ * decimal + lowercase k (7800 → "★7.8k"), else the bare count ("★744").
+ * The only place a `★` display string is derived — never hardcode one.
+ */
+export function formatStars(stars: number): string {
+  return stars >= 1000 ? `★${(stars / 1000).toFixed(1)}k` : `★${stars}`;
+}
 
 export interface Project {
   /** terminal lookup key (`show <name>`) and default display name */
@@ -35,6 +45,10 @@ export interface Project {
   github?: string;
   /** live deployment, when the project has one */
   url?: string;
+  /** raw GitHub star count — display is derived via `formatStars` */
+  stars?: number;
+  /** latest version tag, for the /terminal man-page forks */
+  version?: string;
   facts: ProjectFact[];
   logo: ProjectLogo;
 }
@@ -47,7 +61,9 @@ export const PROJECTS: Project[] = [
       "Co-creator. Introduced the #[napi] macro, lowering the barrier of binding Rust crates to Node.js native addons and WASI.",
     page: "/napi",
     github: "https://github.com/napi-rs/napi-rs",
-    facts: [{ label: "★7.8k", href: "https://github.com/napi-rs/napi-rs" }, { label: "Rust" }],
+    stars: 7800,
+    version: "2.16.13",
+    facts: [{ label: "Rust" }],
     logo: { kind: "img", src: "/projects/napi-favicon.png" },
   },
   {
@@ -57,12 +73,9 @@ export const PROJECTS: Project[] = [
       "Tech leader 2023 → 2025. Led the dev team, built y-octo (a Rust CRDT engine), and shipped AFFiNE.",
     page: "/affine",
     github: "https://github.com/toeverything/AFFiNE",
-    facts: [
-      { label: "★70.6k", href: "https://github.com/toeverything/AFFiNE" },
-      { label: "Rust" },
-      { label: "TypeScript" },
-      { label: "CRDT" },
-    ],
+    stars: 70600,
+    version: "0.25.0",
+    facts: [{ label: "Rust" }, { label: "TypeScript" }, { label: "CRDT" }],
     logo: { kind: "simple", Icon: SiAffine },
   },
   {
@@ -72,10 +85,9 @@ export const PROJECTS: Project[] = [
       "Created at ByteDance — an analyzer for measuring bundles and runtime performance of web applications; inspires rsdoctor.",
     page: "/perfsee",
     github: "https://github.com/perfsee/perfsee",
-    facts: [
-      { label: "★744", href: "https://github.com/perfsee/perfsee" },
-      { label: "inspires rsdoctor", href: "https://github.com/web-infra-dev/rsdoctor" },
-    ],
+    stars: 744,
+    version: "1.9.0",
+    facts: [{ label: "inspires rsdoctor", href: "https://github.com/web-infra-dev/rsdoctor" }],
     logo: { kind: "img", src: "/projects/perfsee-logo.svg" },
   },
   {

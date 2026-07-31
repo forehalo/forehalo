@@ -10,6 +10,7 @@ import { FileText, Frame, GripVertical } from "lucide-react";
 import { SectionHeader } from "@/components/section-header";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useScrollTo } from "@/hooks/use-smooth-scroll";
+import { PROJECTS, formatStars } from "@/lib/projects";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,11 @@ import { cn } from "@/lib/utils";
  * clamped to the canvas, with arrow-key nudge as the keyboard fallback.
  * Reduced motion: static canvas, no drag.
  */
+
+/** the registry entry behind these blocks — the star count is derived */
+const AFFINE = PROJECTS.find((p) => p.page === "/affine");
+/** "70.6k" — formatStars prefixes the ★; the canvas block renders it after */
+const AFFINE_STARS = formatStars(AFFINE?.stars ?? 0).slice(1);
 
 interface BlockDef {
   id: string;
@@ -45,13 +51,13 @@ const BLOCKS: BlockDef[] = [
   },
   {
     id: "scale",
-    name: "scale — 70.6k GitHub stars",
+    name: `scale — ${AFFINE_STARS} GitHub stars`,
     tag: "block:callout",
     width: "w-[min(15rem,62vw)]",
     pos: { x: 64, y: 6 },
     title: (
       <>
-        70.6k <span className="text-halo">★</span>
+        {AFFINE_STARS} <span className="text-halo">★</span>
       </>
     ),
     body: "GitHub stars — one of the most-starred open-source knowledge apps.",

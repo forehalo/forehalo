@@ -1,20 +1,27 @@
 import { motion } from "framer-motion";
 import { CompilePrint } from "@/components/motion/compile-print";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { PROJECTS, formatStars } from "@/lib/projects";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
 
 /**
  * P1 · Report hero — the page opens as the cover of an analysis report.
  * A carbon report sheet: mono report chrome (target / branch / job), the
  * PERFSEE wordmark set as a measured artifact, and a fact grid
- * (role, org, era, stars, language).
+ * (role, org, era, stars, language). Star count comes from the shared
+ * registry (projects.md §data) — never hardcoded.
  */
+
+/** the registry entry behind this report */
+const PERFSEE = PROJECTS.find((p) => p.page === "/perfsee");
 
 const FACTS: { k: string; v: string; accent?: boolean }[] = [
   { k: "role", v: "creator · leader" },
   { k: "org", v: "ByteDance" },
   { k: "era", v: "2020–2023" },
-  { k: "stars", v: "744★", accent: true },
+  // this report renders the star after the number ("744★") — formatStars
+  // prefixes it, so strip the prefix and re-add the star at the end
+  { k: "stars", v: `${formatStars(PERFSEE?.stars ?? 0).slice(1)}★`, accent: true },
   { k: "language", v: "TypeScript · Rust" },
 ];
 

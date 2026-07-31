@@ -1,15 +1,22 @@
 import { Link } from "react-router";
+import { formatStars } from "@/lib/projects";
 import { DocHeader, DocKv, DocLink, DocList, DocSection } from "@/pages/terminal/doc";
 import { PagerHint, usePager } from "@/pages/terminal/pager";
 import { PROJECTS } from "@/pages/terminal/data/projects";
 
 const entry = PROJECTS.find((p) => p.route === "/terminal/perfsee");
+/** registry facts — formatted here, never hardcoded */
+const version = entry?.version ?? "";
+// perfsee renders the star AFTER the number ("744★") — formatStars prefixes
+// it, so strip the prefix and re-add the star at the end
+const stars = entry?.stars ? `${formatStars(entry.stars).slice(1)}★` : "";
 
 /**
  * /terminal/perfsee — man-page fork of /perfsee (terminal.md §projects).
  * Pure text retelling of the measurement lab; every fact is lifted from
  * src/pages/perfsee/* (report cover facts, the three instruments, legacy
- * outro) plus the crate version from PAGE_LOG in @/components/layout.tsx.
+ * outro), with version and star count from the shared registry
+ * (@/lib/projects, via the terminal adapter).
  * 靠左居中: vertically centered while the doc fits, top-aligned once it
  * scrolls. Nothing animates, so no reduced-motion gating is needed.
  */
@@ -39,8 +46,8 @@ export default function TerminalPerfsee() {
             <DocKv k="role">creator · leader</DocKv>
             <DocKv k="org">ByteDance</DocKv>
             <DocKv k="era">2020–2023</DocKv>
-            <DocKv k="version">1.9.0</DocKv>
-            <DocKv k="stars">744★</DocKv>
+            <DocKv k="version">{version}</DocKv>
+            <DocKv k="stars">{stars}</DocKv>
             <DocKv k="language">TypeScript · Rust</DocKv>
           </div>
         </DocSection>

@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { useCountUp } from "@/hooks/use-count-up";
 import { useInViewOnce } from "@/hooks/use-in-view-once";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { PROJECTS } from "@/lib/projects";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
 
 /**
@@ -13,12 +14,20 @@ import { EASE_COMPILE_OUT } from "@/lib/motion";
  * sits right under the description.
  */
 
+/** the registry entry behind this hero — the count-up derives from `stars` */
+const AFFINE = PROJECTS.find((p) => p.page === "/affine");
+
 const TITLE = "AFFiNE";
 
 export function CanvasHero() {
   const reduced = useReducedMotion();
   const { ref, inView } = useInViewOnce<HTMLElement>(0.25);
-  const stars = useCountUp(70.6, { start: inView, decimals: 1, duration: 1300 });
+  // count-up animates the k-value; the registry stores raw stars (70600 → 70.6k)
+  const stars = useCountUp((AFFINE?.stars ?? 0) / 1000, {
+    start: inView,
+    decimals: 1,
+    duration: 1300,
+  });
 
   return (
     <section
