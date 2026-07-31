@@ -1,5 +1,8 @@
 /**
- * Stable route paths used across chrome (navbar, palette, QR gate).
+ * Stable route constants — the LEAF definitions. The route registry
+ * (@/lib/crates) re-exports the path constants so chrome imports every
+ * route fact from one module. scripts/verify-qr.mjs reads this file as
+ * text and asserts the literal definitions — keep them here.
  * Landing (`/`) is the receipt gate; the compiled-identity home lives at
  * INNER_HOME_PATH so project crates stay independent nested routes.
  */

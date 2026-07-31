@@ -4,6 +4,7 @@ import { Layout } from "@/components/layout";
 import { StubPage } from "@/pages/stub";
 import Landing from "@/pages/landing";
 import TerminalLayout from "@/pages/terminal/terminal-layout";
+import { CRATES, TERMINAL_HOME_PATH } from "@/lib/crates";
 
 /**
  * ROUTING CONTRACT (react-dev.md "pattern B — nested routes"):
@@ -16,14 +17,20 @@ import TerminalLayout from "@/pages/terminal/terminal-layout";
  */
 const Home = lazy(() => import("@/pages/home"));
 const Projects = lazy(() => import("@/pages/projects"));
-const Napi = lazy(() => import("@/pages/napi"));
-const Affine = lazy(() => import("@/pages/affine"));
-const Perfsee = lazy(() => import("@/pages/perfsee"));
-// /terminal fork pages (terminal.md) — TerminalLayout itself stays eager
+// /terminal fork index (terminal.md) — TerminalLayout itself stays eager
 const TerminalHome = lazy(() => import("@/pages/terminal"));
-const TerminalNapi = lazy(() => import("@/pages/terminal/projects/napi"));
-const TerminalAffine = lazy(() => import("@/pages/terminal/projects/affine"));
-const TerminalPerfsee = lazy(() => import("@/pages/terminal/projects/perfsee"));
+
+/**
+ * Crate pages + their /terminal forks come from the route registry
+ * (@/lib/crates) as static lazy chunks — module scope keeps stable
+ * component identity and preserves each route's code-split chunk.
+ */
+const CRATE_ROUTES = CRATES.map((c) => ({
+  path: c.path.slice(1),
+  forkPath: c.fork.route.slice(TERMINAL_HOME_PATH.length + 1),
+  Page: lazy(c.load),
+  ForkPage: lazy(c.fork.load),
+}));
 
 function PageLoader() {
   return (
@@ -61,39 +68,26 @@ export default function App() {
             </Lazy>
           }
         />
-        <Route
-          path="napi"
-          element={
-            <Lazy>
-              <Napi />
-            </Lazy>
-          }
-        />
-        <Route
-          path="affine"
-          element={
-            <Lazy>
-              <Affine />
-            </Lazy>
-          }
-        />
+        {CRATE_ROUTES.map(({ path, Page }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <Lazy>
+                <Page />
+              </Lazy>
+            }
+          />
+        ))}
         {/* /y-octo is merged into /affine (sync → merge → compat → log sections) */}
         <Route path="y-octo" element={<Navigate to="/affine" replace />} />
-        <Route
-          path="perfsee"
-          element={
-            <Lazy>
-              <Perfsee />
-            </Lazy>
-          }
-        />
         <Route path="*" element={<StubPage file="404.rs" title="not found" />} />
       </Route>
 
       {/* /terminal fork (terminal.md): own macOS-window chrome via
           TerminalLayout (pattern B — nested routes, renders <Outlet/>);
           deliberately NOT the site Layout (no TopBar/Footer/palette/Lenis). */}
-      <Route path="terminal" element={<TerminalLayout />}>
+      <Route path={TERMINAL_HOME_PATH.slice(1)} element={<TerminalLayout />}>
         <Route
           index
           element={
@@ -102,32 +96,19 @@ export default function App() {
             </Lazy>
           }
         />
-        <Route
-          path="napi"
-          element={
-            <Lazy>
-              <TerminalNapi />
-            </Lazy>
-          }
-        />
-        <Route
-          path="affine"
-          element={
-            <Lazy>
-              <TerminalAffine />
-            </Lazy>
-          }
-        />
-        <Route
-          path="perfsee"
-          element={
-            <Lazy>
-              <TerminalPerfsee />
-            </Lazy>
-          }
-        />
+        {CRATE_ROUTES.map(({ forkPath, ForkPage }) => (
+          <Route
+            key={forkPath}
+            path={forkPath}
+            element={
+              <Lazy>
+                <ForkPage />
+              </Lazy>
+            }
+          />
+        ))}
       </Route>
-      <Route path="tui" element={<Navigate to="/terminal" replace />} />
+      <Route path="tui" element={<Navigate to={TERMINAL_HOME_PATH} replace />} />
     </Routes>
   );
 }

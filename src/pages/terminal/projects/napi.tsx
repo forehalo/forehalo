@@ -1,15 +1,19 @@
 import { Link } from "react-router";
 import { highlightLine } from "@/lib/highlight";
 import { formatStars } from "@/lib/projects";
+import { crateByPath, TERMINAL_HOME_PATH } from "@/lib/crates";
 import { DocHeader, DocKv, DocLink, DocList, DocSection } from "@/pages/terminal/doc";
 import { PagerHint, usePager } from "@/pages/terminal/pager";
-import { PROJECTS } from "@/pages/terminal/data/projects";
 import { AFTER_CODE, GLUE_ELIMINATED, RAW_TOTAL } from "@/pages/napi/raw-binding";
 
-const entry = PROJECTS.find((p) => p.route === "/terminal/napi");
+/** this fork's crate — identity from the route registry, never a re-searched literal */
+const crate = crateByPath("/napi")!;
+/** sibling fork routes for SEE ALSO — derived from the registry */
+const AFFINE_FORK = crateByPath("/affine")!.fork.route;
+const PERFSEE_FORK = crateByPath("/perfsee")!.fork.route;
 /** stars/version are registry facts — formatted here, never hardcoded */
-const stars = entry?.stars ? formatStars(entry.stars) : "";
-const version = entry?.version ?? "";
+const stars = crate.project?.stars ? formatStars(crate.project.stars) : "";
+const version = crate.project?.version ?? "";
 
 const AFTER_LINES = AFTER_CODE.split("\n");
 
@@ -18,9 +22,9 @@ const AFTER_LINES = AFTER_CODE.split("\n");
  * (terminal.md §projects). Every fact is lifted from the real page
  * (@/pages/napi): the hero one-liner, the Expander's 118→4 line math and
  * AFTER_CODE, the Anatomy capability glosses, and the Ecosystem trust list.
- * Stars and crate version come from the registry via
- * @/pages/terminal/data/projects (formatted by `formatStars`). Text only —
- * nothing animates, so no reduced-motion gating is needed.
+ * Stars and crate version come from the route registry (@/lib/crates →
+ * @/lib/projects, formatted by `formatStars`). Text only — nothing
+ * animates, so no reduced-motion gating is needed.
  */
 export default function TerminalNapi() {
   // less(1) keys: j/k scroll, q quits to /terminal (terminal.md §pager)
@@ -28,7 +32,7 @@ export default function TerminalNapi() {
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-6 md:px-10">
       <div className="max-w-3xl font-mono">
-        <DocHeader title="NAPI-RS(1)" tagline={entry?.tagline} />
+        <DocHeader title="NAPI-RS(1)" tagline={crate.project?.tagline} />
 
         <DocSection title="NAME">
           <p>
@@ -144,13 +148,13 @@ export default function TerminalNapi() {
         <DocSection title="SEE ALSO">
           <DocList
             items={[
-              <Link key="affine" to="/terminal/affine" className="text-halo underline">
+              <Link key="affine" to={AFFINE_FORK} className="text-halo underline">
                 AFFiNE(1)
               </Link>,
-              <Link key="perfsee" to="/terminal/perfsee" className="text-halo underline">
+              <Link key="perfsee" to={PERFSEE_FORK} className="text-halo underline">
                 perfsee(1)
               </Link>,
-              <Link key="terminal" to="/terminal" className="text-halo underline">
+              <Link key="terminal" to={TERMINAL_HOME_PATH} className="text-halo underline">
                 terminal(1)
               </Link>,
             ]}

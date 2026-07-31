@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { TERMINAL_HOME_PATH } from "@/lib/routes";
+import { TERMINAL_HOME_PATH } from "@/lib/crates";
 
 /**
  * Pager — less(1)/man(1) behavior for the /terminal info docs

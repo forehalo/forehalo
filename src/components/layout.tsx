@@ -10,7 +10,7 @@ import { ToastProvider } from "@/components/toaster";
 import { MotionProvider, useReducedMotion } from "@/hooks/use-reduced-motion";
 import { SmoothScrollProvider, useLenis } from "@/hooks/use-smooth-scroll";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
-import { INNER_HOME_PATH } from "@/lib/routes";
+import { CRATES, INNER_HOME_PATH } from "@/lib/crates";
 
 /**
  * Layout — global chrome for every page (design.md §8).
@@ -96,14 +96,15 @@ export function Layout() {
 /* ── Page transition: "recompile wipe" (design.md §6) ───────────────────
  * On route change an amber scanline sweeps top→bottom trailing 3 mono log
  * lines; the new page reveals beneath it. Skipped on first mount and under
- * reduced motion. */
+ * reduced motion. Chrome routes keep their own wipe labels below; crate
+ * labels + versions derive from the route registry (@/lib/crates). */
 const PAGE_LOG: Record<string, { crate: string; version?: string }> = {
   "/": { crate: "receipt" },
   [INNER_HOME_PATH]: { crate: "index" },
   "/projects": { crate: "projects" },
-  "/napi": { crate: "napi", version: "2.16.13" },
-  "/affine": { crate: "AFFiNE", version: "0.25.0" },
-  "/perfsee": { crate: "perfsee", version: "1.9.0" },
+  ...Object.fromEntries(
+    CRATES.map((c) => [c.path, { crate: c.crate, version: c.version }] as const),
+  ),
 };
 
 function RecompileWipe() {

@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router";
 import { SiGithub, SiX } from "@icons-pack/react-simple-icons";
 import { Layers } from "lucide-react";
 import { useCommandPalette } from "@/components/command-palette";
-import { INNER_HOME_PATH, PROJECTS_PATH } from "@/lib/routes";
+import { INNER_HOME_PATH, PROJECTS_PATH } from "@/lib/crates";
 import { cn } from "@/lib/utils";
 
 /**

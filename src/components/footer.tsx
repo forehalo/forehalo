@@ -8,6 +8,7 @@ import { HaloButton } from "@/components/halo-button";
 import { useInViewOnce } from "@/hooks/use-in-view-once";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
+import { CRATES } from "@/lib/crates";
 
 /**
  * Footer (design.md §8.7) — all pages. Contact command block (`cargo add
@@ -117,11 +118,7 @@ export function Footer() {
               inView={inView}
               title="projects"
               delay={0.06}
-              routes={[
-                { label: "#[napi]", to: "/napi" },
-                { label: "AFFiNE", to: "/affine" },
-                { label: "Perfsee", to: "/perfsee" },
-              ]}
+              routes={CRATES.map((c) => ({ label: c.label, to: c.path }))}
             />
           </div>
         </div>

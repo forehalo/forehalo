@@ -2,11 +2,13 @@
  * Terminal view of the shared project registry (terminal.md §data) — DERIVED
  * from @/lib/projects, the single source of truth. Never edit entries here;
  * add projects to the registry and both surfaces update. `route` is the
- * /terminal fork of the project's on-site page (absent when it has none).
+ * /terminal fork of the project's on-site page — derived from the route
+ * registry (@/lib/crates), absent when the crate has no fork page.
  * The `★` fact is derived from the registry `stars` via `formatStars`, so
  * `show` / `open` print exactly the same lines as the registry facts did.
  */
 import { PROJECTS as REGISTRY, formatStars, type ProjectFact } from "@/lib/projects";
+import { crateByPath } from "@/lib/crates";
 
 export type { ProjectFact };
 
@@ -30,7 +32,7 @@ export const PROJECTS: ProjectEntry[] = REGISTRY.map((p) => ({
   facts: p.stars ? [{ label: formatStars(p.stars), href: p.github }, ...p.facts] : p.facts,
   stars: p.stars,
   version: p.version,
-  route: p.page ? `/terminal${p.page}` : undefined,
+  route: p.page ? crateByPath(p.page)?.fork.route : undefined,
 }));
 
 /** Case-insensitive lookup for `show` / `open`. */

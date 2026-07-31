@@ -1,22 +1,26 @@
 import { Link } from "react-router";
 import { formatStars } from "@/lib/projects";
+import { crateByPath, TERMINAL_HOME_PATH } from "@/lib/crates";
 import { DocHeader, DocKv, DocLink, DocList, DocSection } from "@/pages/terminal/doc";
 import { PagerHint, usePager } from "@/pages/terminal/pager";
-import { PROJECTS } from "@/pages/terminal/data/projects";
 
-const entry = PROJECTS.find((p) => p.route === "/terminal/perfsee");
+/** this fork's crate — identity from the route registry, never a re-searched literal */
+const crate = crateByPath("/perfsee")!;
+/** sibling fork routes for SEE ALSO — derived from the registry */
+const NAPI_FORK = crateByPath("/napi")!.fork.route;
+const AFFINE_FORK = crateByPath("/affine")!.fork.route;
 /** registry facts — formatted here, never hardcoded */
-const version = entry?.version ?? "";
+const version = crate.project?.version ?? "";
 // perfsee renders the star AFTER the number ("744★") — formatStars prefixes
 // it, so strip the prefix and re-add the star at the end
-const stars = entry?.stars ? `${formatStars(entry.stars).slice(1)}★` : "";
+const stars = crate.project?.stars ? `${formatStars(crate.project.stars).slice(1)}★` : "";
 
 /**
  * /terminal/perfsee — man-page fork of /perfsee (terminal.md §projects).
  * Pure text retelling of the measurement lab; every fact is lifted from
  * src/pages/perfsee/* (report cover facts, the three instruments, legacy
  * outro), with version and star count from the shared registry
- * (@/lib/projects, via the terminal adapter).
+ * (@/lib/projects, via the route registry).
  * 靠左居中: vertically centered while the doc fits, top-aligned once it
  * scrolls. Nothing animates, so no reduced-motion gating is needed.
  */
@@ -26,7 +30,7 @@ export default function TerminalPerfsee() {
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-6 font-mono md:px-10">
       <div className="max-w-3xl">
-        <DocHeader title="PERFSEE(1)" tagline={entry?.tagline} />
+        <DocHeader title="PERFSEE(1)" tagline={crate.project?.tagline} />
 
         <DocSection title="NAME">
           <p>
@@ -96,13 +100,13 @@ export default function TerminalPerfsee() {
         <DocSection title="SEE ALSO">
           <DocList
             items={[
-              <Link key="napi" to="/terminal/napi" className="text-halo underline">
+              <Link key="napi" to={NAPI_FORK} className="text-halo underline">
                 NAPI-RS(1)
               </Link>,
-              <Link key="affine" to="/terminal/affine" className="text-halo underline">
+              <Link key="affine" to={AFFINE_FORK} className="text-halo underline">
                 AFFINE(1)
               </Link>,
-              <Link key="terminal" to="/terminal" className="text-halo underline">
+              <Link key="terminal" to={TERMINAL_HOME_PATH} className="text-halo underline">
                 terminal(1)
               </Link>,
             ]}

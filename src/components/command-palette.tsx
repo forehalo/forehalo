@@ -16,7 +16,7 @@ import { useTheme } from "next-themes";
 import { useToast } from "@/components/toaster";
 import { useMotionPref } from "@/hooks/use-reduced-motion";
 import { EASE_COMPILE_OUT } from "@/lib/motion";
-import { INNER_HOME_PATH } from "@/lib/routes";
+import { CRATES, INNER_HOME_PATH } from "@/lib/crates";
 import type { ThemePreference } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -188,9 +188,13 @@ function PaletteOverlay() {
     () => [
       { id: "open-home", group: "open", label: "open: Home", run: () => go(INNER_HOME_PATH) },
       { id: "open-receipt", group: "open", label: "open: Receipt", run: () => go("/") },
-      { id: "open-napi", group: "open", label: "open: #[napi]", run: () => go("/napi") },
-      { id: "open-affine", group: "open", label: "open: AFFiNE", run: () => go("/affine") },
-      { id: "open-perfsee", group: "open", label: "open: Perfsee", run: () => go("/perfsee") },
+      // crate routes come from the registry — one edit there updates the palette
+      ...CRATES.map((c) => ({
+        id: `open-${c.path.slice(1)}`,
+        group: "open",
+        label: `open: ${c.label}`,
+        run: () => go(c.path),
+      })),
       {
         id: "copy-email",
         group: "copy",

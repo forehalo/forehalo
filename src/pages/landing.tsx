@@ -1,5 +1,5 @@
 import { encodeQrMatrix, SITE_QR_PAYLOAD } from "@/lib/qr";
-import { INNER_HOME_PATH, TERMINAL_HOME_PATH } from "@/lib/routes";
+import { INNER_HOME_PATH, TERMINAL_HOME_PATH } from "@/lib/crates";
 import { cn } from "@/lib/utils";
 import { COMMITS, logInvoiceAmount, parseLogMessage, type LogCommit } from "@/pages/home/log-data";
 import { LANDING_VISIT_MAX, recordLandingVisit } from "@/pages/landing/visit-count";

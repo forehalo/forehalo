@@ -1,13 +1,17 @@
 import { Link } from "react-router";
 import { formatStars } from "@/lib/projects";
+import { crateByPath, TERMINAL_HOME_PATH } from "@/lib/crates";
 import { DocHeader, DocKv, DocLink, DocList, DocSection } from "@/pages/terminal/doc";
 import { PagerHint, usePager } from "@/pages/terminal/pager";
-import { PROJECTS } from "@/pages/terminal/data/projects";
 
-const entry = PROJECTS.find((p) => p.route === "/terminal/affine");
+/** this fork's crate — identity from the route registry, never a re-searched literal */
+const crate = crateByPath("/affine")!;
+/** sibling fork routes for SEE ALSO — derived from the registry */
+const NAPI_FORK = crateByPath("/napi")!.fork.route;
+const PERFSEE_FORK = crateByPath("/perfsee")!.fork.route;
 /** stars/version are registry facts — formatted here, never hardcoded */
-const stars = entry?.stars ? formatStars(entry.stars) : "";
-const version = entry?.version ?? "";
+const stars = crate.project?.stars ? formatStars(crate.project.stars) : "";
+const version = crate.project?.version ?? "";
 
 /**
  * /terminal/affine — man-page fork of /affine (terminal.md §projects).
@@ -16,7 +20,7 @@ const version = entry?.version ?? "";
  * sync claim ("many cursors, one document, zero conflicts"), the y-octo
  * engine story and its (illustrative) cargo-test compat readout, the
  * META_DESC role summary, plus version and star count from the shared
- * registry (@/lib/projects, via the terminal adapter).
+ * registry (@/lib/projects, via the route registry).
  * Pure text — the terminal fork drops the canvas/cursor exhibits.
  */
 
@@ -38,7 +42,7 @@ export default function TerminalAffine() {
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-6 font-mono md:px-10">
       <div className="max-w-3xl">
-        <DocHeader title="AFFiNE(1)" tagline={entry?.tagline} />
+        <DocHeader title="AFFiNE(1)" tagline={crate.project?.tagline} />
 
         <DocSection title="NAME">
           <p>affine — a collaborative knowledge base · v{version}</p>
@@ -110,15 +114,15 @@ export default function TerminalAffine() {
 
         <DocSection title="SEE ALSO">
           <p>
-            <Link to="/terminal/napi" className="text-halo underline">
+            <Link to={NAPI_FORK} className="text-halo underline">
               napi-rs(1)
             </Link>
             {", "}
-            <Link to="/terminal/perfsee" className="text-halo underline">
+            <Link to={PERFSEE_FORK} className="text-halo underline">
               perfsee(1)
             </Link>
             {", "}
-            <Link to="/terminal" className="text-halo underline">
+            <Link to={TERMINAL_HOME_PATH} className="text-halo underline">
               terminal(1)
             </Link>
           </p>
