@@ -138,7 +138,7 @@ export function LinkFrame() {
         <motion.div
           key={frame.id}
           aria-hidden
-          className="pointer-events-none fixed z-9999"
+          className="pointer-events-none fixed z-9999 print:hidden"
           initial={
             reduced
               ? false

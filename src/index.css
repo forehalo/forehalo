@@ -372,6 +372,44 @@ html.light .forge-liquid-glass {
     }
   }
 
+  /* ── Print: paper output ────────────────────────────────────────────
+     Browsers don't print background colors by default, so the dark forge
+     palette would render bone-on-white (invisible text). Mirror the
+     html.light values onto html for print — keep in sync with that block.
+     Chrome (TopBar / Footer / backdrop / grain / link frame) opts out via
+     `print:hidden` at the elements themselves. */
+  @media print {
+    @page {
+      margin: 18mm 16mm;
+    }
+
+    html {
+      color-scheme: light;
+      --void: #f4f1ea;
+      --carbon: #fffdf8;
+      --carbon-2: #efeae1;
+      --steel: #ddd6c8;
+      --steel-soft: #c4bbab;
+      --bone: #14161a;
+      --ash: #5a5f68;
+      --dim: #8b9098;
+      --halo: #c98512;
+      --halo-soft: rgba(201, 133, 18, 0.14);
+      --halo-glow: rgba(201, 133, 18, 0.16);
+      --halo-glow-mid: rgba(201, 133, 18, 0.12);
+      --rust: #e04a1a;
+      --node: #5a9e2e;
+      --wasi-cyan: #1a9fb8;
+      --danger: #d93636;
+    }
+
+    body {
+      background: #fff;
+      /* screen line-height (1.6) reads loose on paper */
+      line-height: 1.5;
+    }
+  }
+
   /* Reduced motion: kill all decorative animation (design.md §9) */
   @media (prefers-reduced-motion: reduce) {
     *,

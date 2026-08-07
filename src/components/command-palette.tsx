@@ -150,6 +150,7 @@ function PaletteOverlay() {
     () => [
       { id: "open-home", group: "open", label: "open: Home", run: () => go(INNER_HOME_PATH) },
       { id: "open-receipt", group: "open", label: "open: Receipt", run: () => go("/") },
+      { id: "open-resume", group: "open", label: "open: Resume", run: () => go("/resume") },
       // crate routes come from the registry — one edit there updates the palette
       ...CRATES.map((c) => ({
         id: `open-${c.path.slice(1)}`,

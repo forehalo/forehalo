@@ -16,9 +16,10 @@ import { COMMITS, type LogCommit } from "@/pages/home/log-data";
  *
  *   ● main    (x≈14px, steel line, halo dots) — the companies: one2x (HEAD),
  *             toeverything, bytedance, leetcode, netcircle, root commit.
- *   ○ napi-rs (x≈36px, rust line + dots)     — the side project, forked out
- *             of the ByteDance era (57b2aa1 draws the diagonal merge) and
- *             still active — its lane runs flush to the top edge of the log.
+ *   ○ branch  (x≈36px, rust line + dots)     — the open source lane: vite-plus
+ *             (newest) and napi-rs, forked out of the ByteDance era (57b2aa1
+ *             draws the diagonal merge) and still active — the lane runs
+ *             flush to the top edge of the log.
  *
  * The gutter is plain absolutely-positioned divs (w-px line segments +
  * 8px dots at ~top 17px, optically centered on the commit's first text
@@ -33,7 +34,7 @@ import { COMMITS, type LogCommit } from "@/pages/home/log-data";
  * Commit rows live in `log-data.ts` (shared with the receipt invoice).
  */
 
-/* lane geometry — main at x=14, branch (napi-rs, rust) at x=36, dot center y=26 */
+/* lane geometry — main at x=14, branch (open source, rust) at x=36, dot center y=26 */
 const MAIN_X = "left-[14px]";
 const BRANCH_X = "left-[36px]";
 
@@ -140,10 +141,21 @@ export function LogSection({
                     </div>
                   ))}
                 </div>
-                {/* facts + story link as plain content — no chips */}
-                {c.facts && (
+                {/* org link + facts + story link as plain content — no chips */}
+                {(c.link || (c.facts?.length ?? 0) > 0 || c.linkChip) && (
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[12px]">
-                    {c.facts.map((f) =>
+                    {c.link && (
+                      <a
+                        href={c.link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        data-cursor="link"
+                        className="text-halo transition-colors duration-200 hover:text-bone"
+                      >
+                        {c.link.label}
+                      </a>
+                    )}
+                    {c.facts?.map((f) =>
                       f.href ? (
                         <a
                           key={f.label}

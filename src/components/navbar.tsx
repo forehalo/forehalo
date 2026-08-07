@@ -48,7 +48,7 @@ function TopBar() {
       className={cn(
         /* do not use Tailwind backdrop-blur-* here — it rewrites backdrop-filter
            via --tw-backdrop-* composites and fights the real glass stack in prod */
-        "fixed inset-x-0 top-0 z-9000 h-14 transition-[background-color,box-shadow] duration-300 ease-out",
+        "fixed inset-x-0 top-0 z-9000 h-14 transition-[background-color,box-shadow] duration-300 ease-out print:hidden",
         scrolled ? "forge-liquid-glass" : "border-0 bg-transparent shadow-none",
       )}
     >

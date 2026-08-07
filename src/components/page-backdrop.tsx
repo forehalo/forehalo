@@ -18,7 +18,7 @@ import type { CSSProperties } from "react";
  */
 export function PageBackdrop() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden print:hidden">
       {/* 1 · ambient wells */}
       <div
         className="absolute inset-0"

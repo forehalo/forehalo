@@ -17,6 +17,7 @@ import { CRATES, TERMINAL_HOME_PATH } from "@/lib/crates";
  */
 const Home = lazy(() => import("@/pages/home"));
 const Projects = lazy(() => import("@/pages/projects"));
+const Resume = lazy(() => import("@/pages/resume"));
 // /terminal fork index (terminal.md) — TerminalLayout itself stays eager
 const TerminalHome = lazy(() => import("@/pages/terminal"));
 
@@ -65,6 +66,14 @@ export default function App() {
           element={
             <Lazy>
               <Projects />
+            </Lazy>
+          }
+        />
+        <Route
+          path="resume"
+          element={
+            <Lazy>
+              <Resume />
             </Lazy>
           }
         />

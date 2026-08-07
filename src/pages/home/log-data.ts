@@ -6,7 +6,7 @@ import { PROJECTS, formatStars, type Project, type ProjectFact } from "@/lib/pro
 
 export interface LogCommit {
   sha: string;
-  /** which lane owns the dot — main = companies, branch = napi-rs */
+  /** which lane owns the dot — main = companies, branch = open source */
   lane: "main" | "branch";
   /** renders a `HEAD → main` chip; main lane starts at this dot (HEAD) */
   head?: boolean;
@@ -19,6 +19,11 @@ export interface LogCommit {
   message: string;
   tags: string[];
   date: string;
+  /** the organization itself — company site or project repo. The resume
+      links the company name here; the home log shows it in the expanded row */
+  link?: ProjectFact;
+  /** verifiable highlights (star counts, "inspires rsdoctor") — display
+      facts only; the organization URL belongs in `link`, not here */
   facts?: ProjectFact[];
   diff: string[];
   /** detail-page route, rendered as `Read More →` */
@@ -45,8 +50,31 @@ export const COMMITS: LogCommit[] = [
     message: "at(one2x): independent contributor",
     tags: ["Rust", "CRDT"],
     date: "2025 →",
-    facts: [{ label: "one2x.ai ↗", href: "https://one2x.ai" }],
-    diff: ["+ new chapter — building at one2x"],
+    link: { label: "one2x.ai ↗", href: "https://one2x.ai" },
+    diff: [
+      "+ new chapter — building at one2x",
+      "+ build dynamic workflow engine for agent of medeo.app",
+      "+ build ReBAC(Google Zanzibar) system",
+      "+ build collaborative video editor for medeo.app (CRDT)",
+    ],
+  },
+  {
+    sha: "fe4c0de",
+    lane: "branch",
+    branchLane: true,
+    message: "at(vite-plus): contributor",
+    tags: ["Rust", "TypeScript"],
+    date: "2026 →",
+    link: {
+      label: "voidzero-dev/vite-plus ↗",
+      href: "https://github.com/voidzero-dev/vite-plus",
+    },
+    // ★ count lives HERE (not the registry — vite-plus has no site page or
+    // /projects card); the resume's open source section derives from it
+    facts: [{ label: "★5.5k", href: "https://github.com/voidzero-dev/vite-plus" }],
+    diff: [
+      "+ VoidZero's unified toolchain — runtime, package manager, and frontend toolchain in one CLI (vp)",
+    ],
   },
   {
     sha: "9c3e1d7",
@@ -55,6 +83,7 @@ export const COMMITS: LogCommit[] = [
     message: "at(toeverything): tech leader · ship AFFiNE",
     tags: ["Rust", "TypeScript", "CRDT"],
     date: "2023 → 2025",
+    link: { label: "toeverything/AFFiNE ↗", href: "https://github.com/toeverything/AFFiNE" },
     facts: starFact("/affine"),
     diff: [
       "+ led the dev team",
@@ -70,6 +99,7 @@ export const COMMITS: LogCommit[] = [
     message: "at(napi-rs): co-creator · implemented #[napi]",
     tags: ["Rust"],
     date: "2021 →",
+    link: { label: "napi.rs ↗", href: "https://napi.rs" },
     facts: starFact("/napi"),
     diff: ["+ introduce #[napi] macro for Rust → Node.js FFI"],
     linkChip: { to: "/napi" },
@@ -81,6 +111,7 @@ export const COMMITS: LogCommit[] = [
     message: "at(ByteDance): frontend architector · ship Perfsee",
     tags: ["TypeScript", "Rust"],
     date: "2020 → 2023",
+    link: { label: "perfsee/perfsee ↗", href: "https://github.com/perfsee/perfsee" },
     facts: [
       ...starFact("/perfsee"),
       { label: "inspires rsdoctor", href: "https://github.com/web-infra-dev/rsdoctor" },
@@ -98,7 +129,7 @@ export const COMMITS: LogCommit[] = [
     message: "at(LeetCode): frontend engineer",
     tags: ["TypeScript", "GraphQL", "React"],
     date: "2019 → 2020",
-    facts: [{ label: "leetcode.cn ↗", href: "https://leetcode.cn" }],
+    link: { label: "leetcode.cn ↗", href: "https://leetcode.cn" },
     diff: [
       "+ contribute to leetcode.cn",
       "+ ship assessment platform with business partners",
@@ -120,7 +151,6 @@ export const COMMITS: LogCommit[] = [
     message: "at(Soochow University): initial commit",
     tags: [],
     date: "→ 2017",
-    facts: [],
     diff: ["+ software engineering"],
   },
 ];
