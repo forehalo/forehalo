@@ -56,7 +56,8 @@ export interface Project {
 export const PROJECTS: Project[] = [
   {
     name: "napi-rs",
-    tagline: "Pre-compiled Node.js addons in Rust — one attribute, zero glue.",
+    tagline:
+      "Pre-compiled Node.js addons in Rust — one attribute, zero glue; the only choice for Rust-built frontend tooling like Rspack, SWC, and Rolldown.",
     description:
       "Co-creator. Introduced the #[napi] macro, lowering the barrier of binding Rust crates to Node.js native addons and WASI.",
     page: "/napi",

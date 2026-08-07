@@ -22,7 +22,7 @@ const META_DESC =
 
 /** Resume-grade titles per role; the log's terse `rest` is the fallback. */
 const ROLE_TITLES: Record<string, string> = {
-  f0e4a11: "Independent Contributor",
+  f0e4a11: "Full-Stack Engineer",
   "9c3e1d7": "Tech Leader",
   "57b2aa1": "Frontend Architect",
   "1a0ff00": "Frontend Engineer",

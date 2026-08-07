@@ -48,11 +48,10 @@ export const COMMITS: LogCommit[] = [
     head: true,
     branchLane: true,
     message: "at(one2x): independent contributor",
-    tags: ["Rust", "CRDT"],
+    tags: ["Rust", "TypeScript", "CRDT"],
     date: "2025 →",
     link: { label: "one2x.ai ↗", href: "https://one2x.ai" },
     diff: [
-      "+ new chapter — building at one2x",
       "+ build dynamic workflow engine for agent of medeo.app",
       "+ build ReBAC(Google Zanzibar) system",
       "+ build collaborative video editor for medeo.app (CRDT)",
@@ -119,7 +118,7 @@ export const COMMITS: LogCommit[] = [
     diff: [
       "+ lead dev team",
       "+ created perfsee — bundle analysis · flamegraphs · scoring",
-      "+ guide teams to optimize build & runtime performance of webapps",
+      "+ help TikTok, Douyin Live and other teams optimize build & runtime performance",
     ],
     linkChip: { to: "/perfsee" },
   },
